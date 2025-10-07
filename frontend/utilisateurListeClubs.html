@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clubs Disponibles</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', sans-serif; }
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .navbar-menu {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        .navbar-menu a {
+            color: #555;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .navbar-menu a:hover,
+        .navbar-menu a.active {
+            background: #ede7f6;
+            color: #667eea;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .page-header h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .page-header p { color: #666; font-size: 1.1em; }
+        .search-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .filter-btn {
+            padding: 12px 25px;
+            background: #ede7f6;
+            color: #667eea;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .clubs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+        .club-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+        .club-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(102,126,234,0.2);
+        }
+        .club-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        .club-logo {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            margin: 0 auto 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .club-name {
+            color: white;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        .club-body {
+            padding: 25px;
+        }
+        .club-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+        .club-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+        .club-stat {
+            text-align: center;
+        }
+        .club-stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .club-stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .club-admin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .admin-info { flex: 1; }
+        .admin-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+        .admin-role {
+            font-size: 0.85em;
+            color: #666;
+        }
+        .club-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-outline {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            background: white;
+            color: #4caf50;
+        }
+        @media (max-width: 768px) {
+            .navbar-menu { display: none; }
+            .clubs-grid { grid-template-columns: 1fr; }
+            .search-bar { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">🎓 GestionEvents</div>
+        <div class="navbar-menu">
+            <a href="dashboard.php">Accueil</a>
+            <a href="clubs.php" class="active">Clubs</a>
+            <a href="evenements.php">Événements</a>
+            <a href="mes_inscriptions.php">Mes inscriptions</a>
+        </div>
+        <div>
+            <a href="dashboard.php" class="btn btn-outline" style="padding: 8px 20px; font-size: 0.9em;">← Retour</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>🏢 Découvrir les clubs</h1>
+            <p>Rejoignez les clubs qui vous intéressent et participez à leurs événements</p>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="🔍 Rechercher un club par nom..."
+                   id="searchClub">
+            <button class="filter-btn">🎯 Tous les clubs</button>
+            <button class="filter-btn">✓ Mes clubs</button>
+        </div>
+
+        <div class="clubs-grid">
+            <div class="club-card">
+                <div class="club-header">
+                    <span class="badge">✓ Membre</span>
+                    <div class="club-logo">💻</div>
+                    <div class="club-name">Club Informatique</div>
+                </div>
+                <div class="club-body">
+                    <p class="club-description">
+                        Rejoignez-nous pour explorer les dernières technologies, participer à des hackathons et développer vos compétences en programmation.
+                    </p>
+                    <div class="club-stats">
+                        <div class="club-stat">
+                            <div class="club-stat-value">45</div>
+                            <div class="club-stat-label">Membres</div>
+                        </div>
+                        <div class="club-stat">
+                            <div class="club-stat-value">12</div>
+                            <div class="club-stat-label">Événements</div>
+                        </div>
+                    </div>
+                    <div class="club-admin">
+                        <div class="admin-avatar">OA</div>
+                        <div class="admin-info">
+                            <div class="admin-name">Oumaima Ameziane</div>
+                            <div class="admin-role">Présidente du club</div>
+                        </div>
+                    </div>
+                    <div class="club-actions">
+                        <a href="club_detail.php?id=1" class="btn btn-primary">Voir les événements</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="club-card">
+                <div class="club-header">
+                    <div class="club-logo">🤖</div>
+                    <div class="club-name">Club AIGEEKS</div>
+                </div>
+                <div class="club-body">
+                    <p class="club-description">
+                        Intelligence artificielle, apprentissage automatique, projets IA et compétitions, big data. Rejoignez-nous pour innover avec l'IA !
+                    </p>
+                    <div class="club-stats">
+                        <div class="club-stat">
+                            <div class="club-stat-value">38</div>
+                            <div class="club-stat-label">Membres</div>
+                        </div>
+                        <div class="club-stat">
+                            <div class="club-stat-value">8</div>
+                            <div class="club-stat-label">Événements</div>
+                        </div>
+                    </div>
+                    <div class="club-admin">
+                        <div class="admin-avatar">ZT</div>
+                        <div class="admin-info">
+                            <div class="admin-name">Zakaria Tibtiba</div>
+                            <div class="admin-role">Président du club</div>
+                        </div>
+                    </div>
+                    <div class="club-actions">
+                        <button class="btn btn-primary" onclick="rejoindreClub(2)">➕ Rejoindre</button>
+                        <a href="club_detail.php?id=2" class="btn btn-outline">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="club-card">
+                <div class="club-header">
+                    <span class="badge">✓ Membre</span>
+                    <div class="club-logo">📢</div>
+                    <div class="club-name">AFI</div>
+                </div>
+                <div class="club-body">
+                    <p class="club-description">
+                        Association des projets caritatifs, actions sociales, collectes de fonds et bénévolat pour des causes humanitaires.
+                    </p>
+                    <div class="club-stats">
+                        <div class="club-stat">
+                            <div class="club-stat-value">52</div>
+                            <div class="club-stat-label">Membres</div>
+                        </div>
+                        <div class="club-stat">
+                            <div class="club-stat-value">15</div>
+                            <div class="club-stat-label">Événements</div>
+                        </div>
+                    </div>
+                    <div class="club-admin">
+                        <div class="admin-avatar">HC</div>
+                        <div class="admin-info">
+                            <div class="admin-name">Hicham Hadri Chabba</div>
+                            <div class="admin-role">Président du club</div>
+                        </div>
+                    </div>
+                    <div class="club-actions">
+                        <a href="club_detail.php?id=3" class="btn btn-primary">Voir les événements</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="club-card">
+                <div class="club-header">
+                    <div class="club-logo">🎨</div>
+                    <div class="club-name">Club Art</div>
+                </div>
+                <div class="club-body">
+                    <p class="club-description">
+                        UI/UX Design, graphisme, création de logos et identités visuelles. Apprenez les outils Adobe et Figma.
+                    </p>
+                    <div class="club-stats">
+                        <div class="club-stat">
+                            <div class="club-stat-value">32</div>
+                            <div class="club-stat-label">Membres</div>
+                        </div>
+                        <div class="club-stat">
+                            <div class="club-stat-value">6</div>
+                            <div class="club-stat-label">Événements</div>
+                        </div>
+                    </div>
+                    <div class="club-admin">
+                        <div class="admin-avatar">JE</div>
+                        <div class="admin-info">
+                            <div class="admin-name"> Jihane Elhamdaoui</div>
+                            <div class="admin-role">Présidente du club</div>
+                        </div>
+                    </div>
+                    <div class="club-actions">
+                        <button class="btn btn-primary" onclick="rejoindreClub(4)">➕ Rejoindre</button>
+                        <a href="club_detail.php?id=4" class="btn btn-outline">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="club-card">
+                <div class="club-header">
+                    <div class="club-logo">💼</div>
+                    <div class="club-name">Club cetec</div>
+                </div>
+                <div class="club-body">
+                    <p class="club-description">
+                        Développez votre esprit entrepreneurial, créez votre startup et participez à des concours de pitch et business plans.
+                    </p>
+                    <div class="club-stats">
+                        <div class="club-stat">
+                            <div class="club-stat-value">41</div>
+                            <div class="club-stat-label">Membres</div>
+                        </div>
+                        <div class="club-stat">
+                            <div class="club-stat-value">10</div>
+                            <div class="club-stat-label">Événements</div>
+                        </div>
+                    </div>
+                    <div class="club-admin">
+                        <div class="admin-avatar">NE</div>
+                        <div class="admin-info">
+                            <div class="admin-name">Nouha Erraboun</div>
+                            <div class="admin-role">Présidente du club</div>
+                        </div>
+                    </div>
+                    <div class="club-actions">
+                        <button class="btn btn-primary" onclick="rejoindreClub(5)">➕ Rejoindre</button>
+                        <a href="club_detail.php?id=5" class="btn btn-outline">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="club-card">
+                <div class="club-header">
+                    <span class="badge">✓ Membre</span>
+                    <div class="club-logo">🌍</div>
+                    <div class="club-name">Club Environnement</div>
+                </div>
+                <div class="club-body">
+                    <p class="club-description">
+                        Actions pour l'environnement, sensibilisation au développement durable et organisation de campagnes écologiques.
+                    </p>
+                    <div class="club-stats">
+                        <div class="club-stat">
+                            <div class="club-stat-value">48</div>
+                            <div class="club-stat-label">Membres</div>
+                        </div>
+                        <div class="club-stat">
+                            <div class="club-stat-value">9</div>
+                            <div class="club-stat-label">Événements</div>
+                        </div>
+                    </div>
+                    <div class="club-admin">
+                        <div class="admin-avatar">NE</div>
+                        <div class="admin-info">
+                            <div class="admin-name">Nadia El Fassi</div>
+                            <div class="admin-role">Présidente du club</div>
+                        </div>
+                    </div>
+                    <div class="club-actions">
+                        <a href="club_detail.php?id=6" class="btn btn-primary">Voir les événements</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Recherche en temps réel
+        document.getElementById('searchClub').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const clubCards = document.querySelectorAll('.club-card');
+            
+            clubCards.forEach(card => {
+                const clubName = card.querySelector('.club-name').textContent.toLowerCase();
+                const clubDesc = card.querySelector('.club-description').textContent.toLowerCase();
+                
+                if (clubName.includes(searchTerm) || clubDesc.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Fonction pour rejoindre un club (avec AJAX)
+        async function rejoindreClub(clubId) {
+            if (!confirm('Voulez-vous vraiment rejoindre ce club ?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('../ajax/rejoindre_club.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'club_id=' + clubId
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✓ Vous avez rejoint le club avec succès !');
+                    location.reload();
+                } else {
+                    alert('❌ Erreur : ' + data.message);
+                }
+            } catch (error) {
+                alert('❌ Erreur de connexion');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

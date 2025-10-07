@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un Club</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .page-header {
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .page-header p {
+            color: #666;
+        }
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .form-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .file-upload {
+            border: 2px dashed #e0e0e0;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f9f9ff;
+        }
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        .file-upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 15px auto;
+            border-radius: 10px;
+            display: none;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #555;
+        }
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .info-box strong {
+            color: #1565c0;
+        }
+        .char-counter {
+            text-align: right;
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">🎓 GestionEvents</div>
+        <a href="dashboard.php" class="btn btn-secondary">← Retour au dashboard</a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>🏢 Créer un nouveau club</h1>
+            <p>Remplissez les informations du club</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="clubForm">
+            <div class="form-section">
+                <h3>📝 Informations générales</h3>
+                
+                <div class="form-group">
+                    <label for="nom_club">Nom du club *</label>
+                    <input type="text" 
+                           id="nom_club" 
+                           name="nom_club" 
+                           placeholder="Ex: Club Informatique" 
+                           required
+                           maxlength="150">
+                    <div class="char-counter">
+                        <span id="nom-counter">0</span>/150
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description du club</label>
+                    <textarea id="description" 
+                              name="description" 
+                              placeholder="Décrivez les objectifs et activités du club..."
+                              maxlength="1000"></textarea>
+                    <div class="char-counter">
+                        <span id="desc-counter">0</span>/1000
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>🎨 Logo du club</h3>
+                
+                <div class="form-group">
+                    <label class="file-upload" for="logo">
+                        <div class="file-upload-icon">📷</div>
+                        <div><strong>Cliquez pour télécharger un logo</strong></div>
+                        <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                            PNG, JPG ou GIF (max 2MB)
+                        </div>
+                        <input type="file" 
+                               id="logo" 
+                               name="logo" 
+                               accept="image/*">
+                    </label>
+                    <img id="logo-preview" class="image-preview" alt="Aperçu du logo">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>👤 Administrateur du club</h3>
+                
+                <div class="info-box">
+                    <strong>ℹ️ Important :</strong> Vous pourrez assigner un administrateur au club après sa création, ou en créer un nouveau depuis la page "Admins des clubs".
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="admin_existant">Assigner un admin existant (optionnel)</label>
+                    <select id="admin_existant" name="admin_existant">
+                        <option value="">-- Choisir plus tard --</option>
+                        <option value="1">Ahmed Benali (ahmed.benali@ecole.ma)</option>
+                        <option value="2">Sara El Amrani (sara.elamrani@ecole.ma)</option>
+                        <option value="3">Youssef Tazi (youssef.tazi@ecole.ma)</option>
+                    </select>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <strong>OU</strong>
+                </div>
+
+                <a href="creer_admin_club.php" class="btn btn-secondary" style="display: block; text-align: center;">
+                    ➕ Créer un nouvel administrateur
+                </a>
+            </div>
+
+            <div class="form-actions">
+                <a href="dashboard.php" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary">✓ Créer le club</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Compteur de caractères pour le nom
+        document.getElementById('nom_club').addEventListener('input', function() {
+            document.getElementById('nom-counter').textContent = this.value.length;
+        });
+
+        // Compteur de caractères pour la description
+        document.getElementById('description').addEventListener('input', function() {
+            document.getElementById('desc-counter').textContent = this.value.length;
+        });
+
+        // Preview du logo
+        document.getElementById('logo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('logo-preview');
+            
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Animation du label file upload
+        document.querySelector('.file-upload').addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#667eea';
+            this.style.background = '#f9f9ff';
+        });
+
+        document.querySelector('.file-upload').addEventListener('dragleave', function() {
+            this.style.borderColor = '#e0e0e0';
+            this.style.background = 'white';
+        });
+
+        // Confirmation avant de quitter si formulaire modifié
+        let formModified = false;
+        document.getElementById('clubForm').addEventListener('input', function() {
+            formModified = true;
+        });
+
+        window.addEventListener('beforeunload', function(e) {
+            if (formModified) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        document.getElementById('clubForm').addEventListener('submit', function() {
+            formModified = false;
+        });
+    </script>
+</body>
+</html>

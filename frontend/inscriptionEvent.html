@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription Événement</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', sans-serif; }
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .event-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+        }
+        .event-hero h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        .event-meta {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 1.1em;
+        }
+        .event-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .main-content, .sidebar-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .event-description {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+        .info-box {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .info-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .info-box p {
+            color: #666;
+            margin: 5px 0;
+        }
+        .capacity-indicator {
+            margin: 20px 0;
+        }
+        .capacity-bar {
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .capacity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50 0%, #ff9800 70%, #f44336 90%);
+            width: 90%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        .club-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .club-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+        .club-details h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .club-details p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+        }
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #555;
+        }
+        .btn-success {
+            background: #4caf50;
+            color: white;
+            cursor: default;
+        }
+        .requirement-alert {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .requirement-alert strong {
+            color: #e65100;
+        }
+        .attendees-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .attendee-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85em;
+            border: 2px solid white;
+            margin-left: -10px;
+        }
+        .attendee-avatar:first-child {
+            margin-left: 0;
+        }
+        .more-attendees {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 5px;
+        }
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .event-hero h1 {
+                font-size: 1.8em;
+            }
+            .event-meta {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">🎓 GestionEvents</div>
+        <a href="evenements.php" class="btn btn-secondary" style="padding: 8px 20px; font-size: 0.9em; width: auto;">← Retour aux événements</a>
+    </nav>
+
+    <div class="container">
+        <div class="event-hero">
+            <h1>Hackathon 2025</h1>
+            <div class="event-meta">
+                <div class="event-meta-item">
+                    <span>📅</span>
+                    <span>15 Octobre 2025</span>
+                </div>
+                <div class="event-meta-item">
+                    <span>⏰</span>
+                    <span>09:00 - 18:00</span>
+                </div>
+                <div class="event-meta-item">
+                    <span>📍</span>
+                    <span>Amphithéâtre </span>
+                </div>
+                <div class="event-meta-item">
+                    <span>👥</span>
+                    <span>45/50 inscrits</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="main-content">
+                <h2 class="section-title">📝 Description de l'événement</h2>
+                <div class="event-description">
+                    <p>
+                        Participez à notre Hackathon annuel 2025 ! Un événement de 24 heures où vous pourrez 
+                        mettre vos compétences en programmation à l'épreuve, travailler en équipe et développer 
+                        des solutions innovantes.
+                    </p>
+                    <p>
+                        Au programme : coding, networking, workshops et conférences avec des professionnels 
+                        de l'industrie. Des prix exceptionnels sont à gagner pour les meilleures équipes !
+                    </p>
+                </div>
+
+                <h2 class="section-title">ℹ️ Informations pratiques</h2>
+                
+                <div class="info-box">
+                    <h4>🎯 Programme</h4>
+                    <p>• 09:00 - Accueil et petit-déjeuner</p>
+                    <p>• 10:00 - Présentation des défis</p>
+                    <p>• 10:30 - Début du Hackathon</p>
+                    <p>• 13:00 - Pause déjeuner</p>
+                    <p>• 17:00 - Présentations finales</p>
+                    <p>• 18:00 - Remise des prix</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>📦 À apporter</h4>
+                    <p>• Votre ordinateur portable</p>
+                    <p>• Votre chargeur</p>
+                    <p>• Votre motivation et créativité !</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>🏆 Prix</h4>
+                    <p>• 1er prix : 5000 DH + Trophée</p>
+                    <p>• 2ème prix : 3000 DH</p>
+                    <p>• 3ème prix : 1500 DH</p>
+                    <p>• Attestations de participation pour tous</p>
+                </div>
+
+            </div>
+
+            <div class="sidebar-content">
+                <h3 class="section-title">📊 Disponibilité</h3>
+                
+                <div class="capacity-indicator">
+                    <div class="capacity-bar">
+                        <div class="capacity-fill">45/50 places</div>
+                    </div>
+                    <p style="text-align: center; margin-top: 10px; color: #ff9800; font-weight: 600;">
+                        ⚠️ Plus que 5 places disponibles !
+                    </p>
+                </div>
+
+                <div class="club-info">
+                    <div class="club-logo">💻</div>
+                    <div class="club-details">
+                        <h4>Club Informatique</h4>
+                        <p>Organisateur</p>
+                    </div>
+                </div>
+
+                <div class="requirement-alert">
+                    <strong>⚠️ Conditions d'inscription</strong>
+                    <p style="margin-top: 10px; color: #666;">
+                        Cet événement est <strong>ouvert à tous</strong> les étudiants de l'école.
+                    </p>
+                </div>
+
+                <button class="btn btn-primary" onclick="inscrireEvenement()">
+                    ✓ S'inscrire maintenant
+                </button>
+                
+                <button class="btn btn-secondary" onclick="window.history.back()">
+                    Retour
+                </button>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="font-size: 0.9em; color: #666;">
+                        📧 Vous recevrez une confirmation par email
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function inscrireEvenement() {
+            // Confirmation
+            if (!confirm('Voulez-vous vraiment vous inscrire à cet événement ?')) {
+                return;
+            }
+
+            // Afficher un loader
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Inscription en cours...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('../ajax/inscrire_evenement.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'evenement_id=1'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    btn.innerHTML = '✓ Inscrit';
+                    btn.className = 'btn btn-success';
+                    
+                    // Afficher un message de succès
+                    alert('✓ Inscription réussie ! Un email de confirmation vous a été envoyé.');
+                    
+                    // Mettre à jour le compteur
+                    const capacityFill = document.querySelector('.capacity-fill');
+                    const currentCount = parseInt(capacityFill.textContent.split('/')[0]);
+                    capacityFill.textContent = (currentCount + 1) + '/50 places';
+                    capacityFill.style.width = ((currentCount + 1) / 50 * 100) + '%';
+
+                } else {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('❌ Erreur : ' + data.message);
+                }
+            } catch (error) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('❌ Erreur de connexion. Veuillez réessayer.');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

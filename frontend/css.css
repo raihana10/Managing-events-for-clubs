@@ -570,3 +570,136 @@ label {
         padding: 15px;
     }
 }
+
+/* Styles spécifiques pour les pages utilisateur */
+.club-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.club-logo-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.club-logo-xs {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+}
+
+.club-logo-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.event-date {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    min-width: 60px;
+}
+
+.date-day {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.date-month {
+    display: block;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.event-club {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.stat-card {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.pagination-numbers {
+    display: flex;
+    gap: 5px;
+}
+
+.empty-state {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Animations supplémentaires */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.slide-up {
+    animation: slideUp 0.5s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters-section .grid-3 {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .event-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

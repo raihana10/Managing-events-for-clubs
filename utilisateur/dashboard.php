@@ -2,11 +2,8 @@
 require_once '../config/database.php';
 require_once '../config/session.php';
 
-redirectIfNotLoggedIn();
-if ($_SESSION['role'] !== 'participant') {
-    header("Location: ../auth/login.php");
-    exit();
-}
+// Vérifier que c'est bien un participant
+requireRole(['participant']);
 
 $database = new Database();
 $db = $database->getConnection();
@@ -20,7 +17,7 @@ $stats = [
     'nb_clubs' => 0,
 ];
 
-// Événements à venir
+// Événements à venir - récupérer tous les événements valides
 $query = "SELECT e.*, c.NomClub, c.Logo 
           FROM Evenement e 
           JOIN Club c ON e.IdClub = c.IdClub 
@@ -29,7 +26,53 @@ $query = "SELECT e.*, c.NomClub, c.Logo
           LIMIT 6";
 $stmt = $db->prepare($query);
 $stmt->execute();
-$evenements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$all_events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Filtrer les événements selon le type de participant et les adhésions de l'utilisateur
+$evenements = [];
+foreach ($all_events as $event) {
+    $is_event_visible = false;
+    
+    // Vérifier si l'événement est visible pour cet utilisateur
+    if ($event['TypeParticipant'] == 'Tous' || $event['TypeParticipant'] == 'Tous les étudiants') {
+        $is_event_visible = true;
+    } elseif ($event['TypeParticipant'] == 'Adhérents') {
+        // Vérifier si l'utilisateur est membre du club
+        $query_membership = "SELECT COUNT(*) FROM Adhesion WHERE IdParticipant = :user_id AND IdClub = :club_id AND Status = 'actif'";
+        $stmt_membership = $db->prepare($query_membership);
+        $stmt_membership->bindParam(':user_id', $user_id);
+        $stmt_membership->bindParam(':club_id', $event['IdClub']);
+        $stmt_membership->execute();
+        $is_member = $stmt_membership->fetchColumn() > 0;
+        
+        if ($is_member) {
+            $is_event_visible = true;
+        }
+    }
+    
+    if ($is_event_visible) {
+        $evenements[] = $event;
+    }
+}
+
+// Ajouter les informations de prix pour chaque événement
+foreach ($evenements as &$event) {
+    // Vérifier si l'utilisateur est membre du club
+    $query_membership = "SELECT COUNT(*) FROM Adhesion WHERE IdParticipant = :user_id AND IdClub = :club_id AND Status = 'actif'";
+    $stmt_membership = $db->prepare($query_membership);
+    $stmt_membership->bindParam(':user_id', $user_id);
+    $stmt_membership->bindParam(':club_id', $event['IdClub']);
+    $stmt_membership->execute();
+    $is_member = $stmt_membership->fetchColumn() > 0;
+    
+    if ($is_member) {
+        $event['user_price'] = $event['PrixAdherent'];
+        $event['user_type'] = "Adhérent";
+    } else {
+        $event['user_price'] = $event['PrixNonAdherent'];
+        $event['user_type'] = "Non-adhérent";
+    }
+}
 
 // Clubs récents (le schéma fourni n'a pas de compteur de membres)
 $query = "SELECT c.* FROM Club c ORDER BY c.DateCreation DESC LIMIT 6";
@@ -98,12 +141,12 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
     <nav class="navbar">
-        <div class="navbar-brand">🎓 GestionEvents</div>
+        <div class="navbar-brand">GestionEvents</div>
         <div class="navbar-menu">
             <a href="dashboard.php">Accueil</a>
             <a href="clubs.php">Clubs</a>
-            <a href="events.php">Événements</a>
-            <a href="mes_events.php">Mes Événements</a>
+            <a href="evenements.php">Événements</a>
+            <a href="mes_evenements.php">Mes Événements</a>
         </div>
         <div class="user-info">
             <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
@@ -115,28 +158,28 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="container">
         <div class="welcome-section">
-            <h1>Bienvenue, <?php echo htmlspecialchars($_SESSION['prenom']); ?> ! 👋</h1>
+            <h1>Bienvenue, <?php echo htmlspecialchars($_SESSION['prenom']); ?> !</h1>
             <p>Découvrez les clubs et événements de votre école</p>
         </div>
 
         <div class="stats-row">
             <div class="stat-box">
-                <div class="stat-icon">🏢</div>
+                <div class="stat-icon">■</div>
                 <div class="stat-number"><?php echo (int)$stats['nb_clubs']; ?></div>
                 <div class="stat-label">Clubs rejoints</div>
             </div>
             <div class="stat-box">
-                <div class="stat-icon">📅</div>
+                <div class="stat-icon">■</div>
                 <div class="stat-number"><?php echo (int)$stats['nb_inscriptions']; ?></div>
                 <div class="stat-label">Événements inscrits</div>
             </div>
             <div class="stat-box">
-                <div class="stat-icon">✓</div>
+                <div class="stat-icon">■</div>
                 <div class="stat-number">0</div>
                 <div class="stat-label">Événements participés</div>
             </div>
             <div class="stat-box">
-                <div class="stat-icon">📜</div>
+                <div class="stat-icon">■</div>
                 <div class="stat-number">0</div>
                 <div class="stat-label">Attestations</div>
             </div>
@@ -144,13 +187,13 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="section">
             <div class="section-header">
-                <h2>🏢 Mes clubs</h2>
+                <h2>Mes clubs</h2>
                 <a href="clubs.php" class="btn btn-primary">Découvrir plus →</a>
             </div>
             <div class="clubs-grid">
                 <?php foreach ($clubs as $club): ?>
                 <div class="club-card">
-                    <div class="club-logo">🏷️</div>
+                    <div class="club-logo">■</div>
                     <div class="club-name"><?php echo htmlspecialchars($club['NomClub']); ?></div>
                     <p style="color: #666; font-size: 0.95em;">
                         <?php echo htmlspecialchars(mb_strimwidth($club['Description'] ?? '', 0, 100, '...')); ?>
@@ -162,7 +205,7 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endforeach; ?>
                 <?php if (empty($clubs)): ?>
                     <div class="empty-state" style="grid-column: 1 / -1; color:#666;">
-                        <div class="empty-state-icon">🏷️</div>
+                        <div class="empty-state-icon">■</div>
                         <h3>Aucun club disponible</h3>
                         <p>Découvrez les clubs depuis la page Clubs.</p>
                     </div>
@@ -172,8 +215,8 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="section">
             <div class="section-header">
-                <h2>📅 Prochains événements</h2>
-                <a href="events.php" class="btn btn-outline">Voir tous les événements →</a>
+                <h2>Prochains événements</h2>
+                <a href="evenements.php" class="btn btn-outline">Voir tous les événements →</a>
             </div>
             <div class="event-list">
                 <?php foreach ($evenements as $event): ?>
@@ -182,19 +225,27 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="event-date-badge"><?php echo date('d F Y', strtotime($event['Date'])); ?></div>
                         <div class="event-title"><?php echo htmlspecialchars($event['NomEvenement']); ?></div>
                         <div class="event-meta">
-                            <span>🏢 <?php echo htmlspecialchars($event['NomClub']); ?></span>
-                            <span>📍 <?php echo htmlspecialchars($event['Lieu']); ?></span>
-                            <span>⏰ <?php echo htmlspecialchars($event['HeureDebut'] . ' - ' . $event['HeureFin']); ?></span>
+                            <span>■ <?php echo htmlspecialchars($event['NomClub']); ?></span>
+                            <span>■ <?php echo htmlspecialchars($event['Lieu']); ?></span>
+                            <span>■ <?php echo htmlspecialchars($event['HeureDebut'] . ' - ' . $event['HeureFin']); ?></span>
+                            <span>€ 
+                                <?php if ($event['user_price'] == 0 || $event['user_price'] === null): ?>
+                                    <span style="color: #28a745; font-weight: bold;">Gratuit</span>
+                                <?php else: ?>
+                                    <span style="color: #007bff; font-weight: bold;"><?php echo number_format(floatval($event['user_price']), 2); ?> €</span>
+                                <?php endif; ?>
+                                <small>(<?php echo $event['user_type']; ?>)</small>
+                            </span>
                         </div>
                     </div>
                     <div>
-                        <a href="inscription_event.php?id=<?php echo (int)$event['IdEvenement']; ?>" class="btn btn-primary btn-sm">Voir détails</a>
+                        <a href="inscription_evenement.php?id=<?php echo (int)$event['IdEvenement']; ?>" class="btn btn-primary btn-sm">Voir détails</a>
                     </div>
                 </div>
                 <?php endforeach; ?>
                 <?php if (empty($evenements)): ?>
                 <div class="empty-state" style="width:100%">
-                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-icon">■</div>
                     <h3>Aucun événement à venir</h3>
                     <p>Revenez bientôt pour découvrir les prochains événements.</p>
                 </div>

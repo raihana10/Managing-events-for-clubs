@@ -2,13 +2,20 @@
 require_once '../config/database.php';
 session_start();
 
+// Éviter les boucles de redirection
+if (isset($_GET['redirect_loop'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+
 // Si déjà connecté, rediriger
 if (isset($_SESSION['user_id'])) {
     switch($_SESSION['role']) {
-        case 'super_admin':
+        case 'administrateur':
             header("Location: ../super_admin/dashboard.php");
             break;
-        case 'admin_club':
+        case 'organisateur':
             header("Location: ../admin_club/dashboard.php");
             break;
         case 'participant':
@@ -49,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Normaliser le rôle selon le schéma SQL fourni
                 $dbRole = trim(strtolower($user['Role']));
                 if ($dbRole === 'administrateur') {
-                    $_SESSION['role'] = 'super_admin';
+                    $_SESSION['role'] = 'administrateur';
                 } elseif ($dbRole === 'organisateur') {
-                    $_SESSION['role'] = 'admin_club';
+                    $_SESSION['role'] = 'organisateur';
                 } elseif ($dbRole === 'participant') {
                     $_SESSION['role'] = 'participant';
                 } else {
@@ -68,10 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 // Redirection selon le rôle
                 switch($_SESSION['role']) {
-                    case 'super_admin':
+                    case 'administrateur':
                         header("Location: ../super_admin/dashboard.php");
                         break;
-                    case 'admin_club':
+                    case 'organisateur':
                         header("Location: ../admin_club/dashboard.php");
                         break;
                     case 'participant':

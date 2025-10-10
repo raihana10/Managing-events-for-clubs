@@ -7,8 +7,12 @@ function isLoggedIn() {
 
 function requireLogin() {
     if (!isLoggedIn()) {
-        header("Location: ../auth/login.php");
-        exit();
+        // Éviter les boucles de redirection
+        $current_page = basename($_SERVER['PHP_SELF']);
+        if ($current_page !== 'login.php') {
+            header("Location: ../auth/login.php");
+            exit();
+        }
     }
 }
 
@@ -20,17 +24,31 @@ function redirectIfNotLoggedIn() {
 function requireRole($roles) {
     requireLogin();
     if (!in_array($_SESSION['role'], $roles)) {
-        header("Location: ../index.php");
+        // Rediriger vers la page appropriée selon le rôle
+        switch($_SESSION['role']) {
+            case 'administrateur':
+                header("Location: ../super_admin/dashboard.php");
+                break;
+            case 'organisateur':
+                header("Location: ../admin_club/dashboard.php");
+                break;
+            case 'participant':
+                header("Location: ../utilisateur/dashboard.php");
+                break;
+            default:
+                header("Location: ../auth/login.php");
+                break;
+        }
         exit();
     }
 }
 
 function isSuperAdmin() {
-    return isLoggedIn() && $_SESSION['role'] === 'super_admin';
+    return isLoggedIn() && $_SESSION['role'] === 'administrateur';
 }
 
 function isAdminClub() {
-    return isLoggedIn() && $_SESSION['role'] === 'admin_club';
+    return isLoggedIn() && $_SESSION['role'] === 'organisateur';
 }
 
 function isParticipant() {

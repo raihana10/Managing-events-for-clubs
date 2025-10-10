@@ -1,11 +1,43 @@
 <?php
 require_once '../config/database.php';
+define('RECAPTCHA_SECRET_KEY','6LcxwuUrAAAAAH0hZtRGuIe8yOibf5dTGtSS38OW');
 session_start();
 
 $errors = [];
 $success = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
+        $recaptcha_response = $_POST['g-recaptcha-response'];
+        
+        // Préparer la requête à l'API de Google
+        $url = 'https://www.google.com/recaptcha/api/siteverify';
+        $data = [
+            'secret' => RECAPTCHA_SECRET_KEY,
+            'response' => $recaptcha_response
+        ];
+
+        $options = [
+            'http' => [
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data)
+            ]
+        ];
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        $json_result = json_decode($result, true);
+
+        // Si Google dit que la validation a échoué
+         if (!$json_result['success']) {
+            $errors[] = "La vérification reCAPTCHA a échoué. Veuillez réessayer.";
+        }
+    } else {
+        // Si la case n'a même pas été cochée
+        $errors[] = "Veuillez cocher la case 'Je ne suis pas un robot'.";
+    }
+
     $nom = trim($_POST['nom']);
     $prenom = trim($_POST['prenom']);
     $email = trim($_POST['email']);
@@ -233,6 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             gap: 15px;
         }
     </style>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
     <div class="register-container">
@@ -291,7 +324,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <input type="password" id="confirm_password" name="confirm_password" required>
             </div>
 
-           
+            <div class="form-group" style="display: flex;justify-content: center; margin-top: 20px;">
+                <div class="g-recaptcha" data-sitekey="6LcxwuUrAAAAADuwTqnQq54AwIgsWsAWQxPVzoj4"></div>
+            </div>
 
             <button type="submit" class="btn-primary">S'inscrire</button>
         </form>

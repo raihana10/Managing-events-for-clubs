@@ -10,7 +10,7 @@ use PHPMailer\PHPMailer\SMTP;
 // Configuration Gmail
 $smtp_host = 'smtp.gmail.com';
 $smtp_username = 'mohito.raihana@gmail.com';  // REMPLACEZ par votre Gmail
-$smtp_password = '';  // REMPLACEZ par le mot de passe d'application
+$smtp_password = 'pqie uzik iuym wsgl';  // REMPLACEZ par le mot de passe d'application
 $smtp_port = 587;
 
 $mail = new PHPMailer(true);

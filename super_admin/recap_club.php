@@ -185,13 +185,13 @@ $is_updated = isset($_GET['updated']);
                 <h3>📋 Récapitulatif du club</h3>
                 
                 <div class="club-header-modern" style="margin-bottom: var(--space-xl);">
-                    <?php if (!empty($club_data['LogoClub'])): ?>
-                        <img src="../<?php echo htmlspecialchars($club_data['LogoClub']); ?>" 
+                    <?php if (!empty($club_data['Logo'])): ?>
+                        <img src="../<?php echo htmlspecialchars($club_data['Logo']); ?>" 
                              alt="Logo" class="club-logo-modern" style="width: 120px; height: 120px; border-radius: var(--radius-lg); margin-bottom: var(--space-md);">
                     <?php endif; ?>
                     <div>
                         <h2 style="color: var(--primary); margin-bottom: var(--space-sm);"><?php echo htmlspecialchars($club_data['NomClub']); ?></h2>
-                        <p style="color: var(--text-secondary);"><?php echo htmlspecialchars($club_data['Description']); ?></p>
+                        
                     </div>
                 </div>
 
@@ -224,8 +224,8 @@ $is_updated = isset($_GET['updated']);
                         <h4 style="color: var(--text-primary); margin-bottom: var(--space-sm);">Informations du club</h4>
                         <div style="display: grid; gap: var(--space-sm); background: var(--bg-secondary); padding: var(--space-lg); border-radius: var(--radius-md);">
                             <div><strong>Nom :</strong> <?php echo htmlspecialchars($club_data['NomClub']); ?></div>
-                            <div><strong>Type d'événements :</strong> <span class="badge badge-info"><?php echo htmlspecialchars($club_data['TypeEvenement']); ?></span></div>
-                            <div><strong>Politique d'adhésion :</strong> <span class="badge badge-success"><?php echo htmlspecialchars($club_data['PolitiqueAdhesion']); ?></span></div>
+                            <div><strong>Description :</strong> <span class="badge badge-info"><?php echo htmlspecialchars($club_data['Description']); ?></span></div>
+                            
                             <div><strong>Date de création :</strong> <?php echo date('d/m/Y', strtotime($club_data['DateCreation'])); ?></div>
                         </div>
                     </div>

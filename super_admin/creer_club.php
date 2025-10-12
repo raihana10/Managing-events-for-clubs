@@ -90,16 +90,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         // Vérifier si le nom du club existe déjà (sauf pour le club en cours d'édition)
         try {
-            $sql_check = "SELECT IdClub FROM Club WHERE NomClub = :nom_club";
-            $params = [':nom_club' => $nom_club];
-            
             if ($edition_mode && $club_id) {
-                $sql_check .= " AND IdClub != :club_id";
-                $params[':club_id'] = $club_id;
+                // Mode édition : vérifier si un autre club a le même nom
+                $sql_check = "SELECT IdClub FROM Club WHERE NomClub = :nom_club AND IdClub != :club_id";
+                $stmt_check = $conn->prepare($sql_check);
+                $stmt_check->bindParam(':nom_club', $nom_club);
+                $stmt_check->bindParam(':club_id', $club_id);
+            } else {
+                // Mode création : vérifier si un club a déjà ce nom
+                $sql_check = "SELECT IdClub FROM Club WHERE NomClub = :nom_club";
+                $stmt_check = $conn->prepare($sql_check);
+                $stmt_check->bindParam(':nom_club', $nom_club);
             }
             
-            $stmt_check = $conn->prepare($sql_check);
-            $stmt_check->execute($params);
+            $stmt_check->execute();
             
             if ($stmt_check->rowCount() > 0) {
                 $errors['nom_club'] = "Un club avec ce nom existe déjà.";
@@ -344,11 +348,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 // Enregistrer l'email dans la base de données
                                 $sql_email = "INSERT INTO EmailAdmin (IdAdmin, DestinataireEmail, DestinataireNom, Objet, Contenu, TypeEmail, IdClub) 
                                             VALUES (:id_admin, :destinataire_email, :destinataire_nom, :objet, :contenu, 'notification_organisateur', :id_club)";
-                                
+
                                 $stmt_email = $conn->prepare($sql_email);
-                                $stmt_email->bindParam(':id_admin', $_SESSION['user_id']);
-                                $stmt_email->bindParam(':destinataire_email', $organisateur_info['Email']);
-                                $stmt_email->bindParam(':destinataire_nom', $organisateur_info['Prenom'] . ' ' . $organisateur_info['Nom']);
+
+                                // Créer des variables pour les valeurs qui ne peuvent pas être passées directement
+                                $id_admin = $_SESSION['user_id'];
+                                $destinataire_email = $organisateur_info['Email'];
+                                $destinataire_nom = $organisateur_info['Prenom'] . ' ' . $organisateur_info['Nom'];
+
+                                $stmt_email->bindParam(':id_admin', $id_admin);
+                                $stmt_email->bindParam(':destinataire_email', $destinataire_email);
+                                $stmt_email->bindParam(':destinataire_nom', $destinataire_nom);
                                 $stmt_email->bindParam(':objet', $objet);
                                 $stmt_email->bindParam(':contenu', $contenu);
                                 $stmt_email->bindParam(':id_club', $club_id);

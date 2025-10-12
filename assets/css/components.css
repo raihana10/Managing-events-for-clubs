@@ -1,8 +1,3 @@
-/* ========================================
-   EVENT MANAGER - COMPOSANTS SPÉCIALISÉS
-   Composants avancés pour l'interface
-   ======================================== */
-
 /* Header avec navigation moderne */
 
 .header-modern {
@@ -761,16 +756,20 @@
   background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%);
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: var(--space-lg);
+  padding: var(--space-xl) var(--space-lg);
   position: relative;
-  overflow: hidden;
+  overflow: auto;
+}
+
+body.auth-page {
+  overflow-y: auto !important;
 }
 
 .auth-page::before {
   content: '';
-  position: absolute;
+  position: fixed;
   top: -50%;
   left: -50%;
   width: 200%;
@@ -797,10 +796,13 @@
   position: relative;
   z-index: 1;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  margin: var(--space-2xl) auto;
 }
 
 .register-container {
   max-width: 600px;
+  min-height: auto;
+  overflow: visible;
 }
 
 .logo-section {

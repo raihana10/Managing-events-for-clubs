@@ -7,45 +7,15 @@ $errors = [];
 $success = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // 1. D'abord valider les champs du formulaire
+    $nom = trim($_POST['nom'] ?? '');
+    $prenom = trim($_POST['prenom'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $telephone = trim($_POST['telephone'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
-    if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
-        $recaptcha_response = $_POST['g-recaptcha-response'];
-        
-        // Préparer la requête à l'API de Google
-        $url = 'https://www.google.com/recaptcha/api/siteverify';
-        $data = [
-            'secret' => RECAPTCHA_SECRET_KEY,
-            'response' => $recaptcha_response
-        ];
-
-        $options = [
-            'http' => [
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            ]
-        ];
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-        $json_result = json_decode($result, true);
-
-        // Si Google dit que la validation a échoué
-         if (!$json_result['success']) {
-            $errors[] = "La vérification reCAPTCHA a échoué. Veuillez réessayer.";
-        }
-    } else {
-        // Si la case n'a même pas été cochée
-        $errors[] = "Veuillez cocher la case 'Je ne suis pas un robot'.";
-    }
-
-    $nom = trim($_POST['nom']);
-    $prenom = trim($_POST['prenom']);
-    $email = trim($_POST['email']);
-    $telephone = trim($_POST['telephone']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    // Validation
+    // Validation des champs
     if (empty($nom) || empty($prenom) || empty($email) || empty($password)) {
         $errors[] = "Tous les champs obligatoires doivent être remplis.";
     }
@@ -62,44 +32,89 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Les mots de passe ne correspondent pas.";
     }
 
-    // Captcha retiré (vous pourrez réimplémenter votre propre mécanisme)
-
-    // Vérifier si l'email existe déjà
+    // 2. Ensuite vérifier le reCAPTCHA (seulement si les champs sont valides)
     if (empty($errors)) {
-        $database = new Database();
-        $db = $database->getConnection();
+        if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
+            $recaptcha_response = $_POST['g-recaptcha-response'];
+            
+            // Préparer la requête à l'API de Google
+            $url = 'https://www.google.com/recaptcha/api/siteverify';
+            $data = [
+                'secret' => RECAPTCHA_SECRET_KEY,
+                'response' => $recaptcha_response
+            ];
 
-        $query = "SELECT IdUtilisateur FROM Utilisateur WHERE Email = :email";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            $errors[] = "Cet email est déjà utilisé.";
+            $options = [
+                'http' => [
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($data)
+                ]
+            ];
+            $context  = stream_context_create($options);
+            $result = @file_get_contents($url, false, $context);
+            
+            if ($result === false) {
+                // Si l'API ne répond pas, on continue quand même (mode développement)
+                error_log("reCAPTCHA API error");
+            } else {
+                $json_result = json_decode($result, true);
+                if (!$json_result['success']) {
+                    $errors[] = "La vérification reCAPTCHA a échoué. Veuillez réessayer.";
+                }
+            }
+        } else {
+            $errors[] = "Veuillez cocher la case 'Je ne suis pas un robot'.";
         }
     }
 
-    // Insertion dans la base
+    // 3. Vérifier si l'email existe déjà
     if (empty($errors)) {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $token = bin2hex(random_bytes(32));
+        try {
+            $database = new Database();
+            $db = $database->getConnection();
 
-        $query = "INSERT INTO Utilisateur (Nom, Prenom, Email, MotDePasse, Telephone, Role, TokenVerification) 
-                  VALUES (:nom, :prenom, :email, :password, :telephone, 'participant', :token)";
-        
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':nom', $nom);
-        $stmt->bindParam(':prenom', $prenom);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':password', $hashed_password);
-        $stmt->bindParam(':telephone', $telephone);
-        $stmt->bindParam(':token', $token);
+            $query = "SELECT IdUtilisateur FROM Utilisateur WHERE Email = :email";
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':email', $email);
+            $stmt->execute();
 
-        if ($stmt->execute()) {
-            // TODO: Envoyer email de vérification
-            $success = "Inscription réussie ! Vous pouvez maintenant vous connecter.";
-        } else {
+            if ($stmt->rowCount() > 0) {
+                $errors[] = "Cet email est déjà utilisé.";
+            }
+        } catch (Exception $e) {
+            $errors[] = "Erreur de connexion à la base de données.";
+            error_log("Database error: " . $e->getMessage());
+        }
+    }
+
+    // 4. Insertion dans la base
+    if (empty($errors)) {
+        try {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $token = bin2hex(random_bytes(32));
+
+            $query = "INSERT INTO Utilisateur (Nom, Prenom, Email, MotDePasse, Telephone, Role, TokenVerification) 
+                      VALUES (:nom, :prenom, :email, :password, :telephone, 'participant', :token)";
+            
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':nom', $nom);
+            $stmt->bindParam(':prenom', $prenom);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':password', $hashed_password);
+            $stmt->bindParam(':telephone', $telephone);
+            $stmt->bindParam(':token', $token);
+
+            if ($stmt->execute()) {
+                $success = "Inscription réussie ! Vous pouvez maintenant vous connecter.";
+                // Rediriger vers la page de connexion après 2 secondes
+                header("Refresh: 2; url=login.php");
+            } else {
+                $errors[] = "Erreur lors de l'inscription.";
+            }
+        } catch (Exception $e) {
             $errors[] = "Erreur lors de l'inscription.";
+            error_log("Insert error: " . $e->getMessage());
         }
     }
 }
@@ -124,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <?php if (!empty($errors)): ?>
             <div class="error-modern">
-                <ul>
+                <ul style="margin: 0; padding-left: 20px;">
                     <?php foreach ($errors as $error): ?>
                         <li><?php echo htmlspecialchars($error); ?></li>
                     <?php endforeach; ?>
@@ -133,7 +148,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endif; ?>
 
         <?php if ($success): ?>
-            <div class="success-modern"><?php echo htmlspecialchars($success); ?></div>
+            <div class="success-modern">
+                <?php echo htmlspecialchars($success); ?>
+                <br><small>Redirection vers la page de connexion...</small>
+            </div>
         <?php endif; ?>
 
         <form method="POST" action="" id="registerForm">

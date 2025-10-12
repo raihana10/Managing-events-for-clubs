@@ -115,294 +115,178 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un administrateur de club</title>
-    <link rel="stylesheet" href="../frontend/css.css">
-    <style>
-        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar {
-            background: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .navbar-brand {
-            font-size: 1.5em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .container {
-            max-width: 600px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .page-header {
-            margin-bottom: 30px;
-        }
-        .page-header h1 {
-            font-size: 2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .page-header p {
-            color: #666;
-        }
-        .form-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .form-section h3 {
-            color: #667eea;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-        }
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #555;
-        }
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-        .error {
-            color: #f44336;
-            font-size: 0.9em;
-            margin-top: 5px;
-            display: block;
-        }
-        .success-message {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #4caf50;
-        }
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .info-box strong {
-            color: #1565c0;
-        }
-        .credentials-box {
-            background: #fff3e0;
-            border: 2px solid #ff9800;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .credentials-box h4 {
-            color: #e65100;
-            margin-bottom: 10px;
-        }
-        .credentials-box p {
-            margin: 5px 0;
-            font-family: monospace;
-            background: #f5f5f5;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        @media (max-width: 768px) {
-            .form-actions {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .btn {
-                width: 100%;
-                text-align: center;
-            }
-        }
-    </style>
+    <title>Créer un administrateur - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">🎓 GestionEvents</div>
-        <a href="dashboard.php" class="btn btn-secondary">Retour au dashboard</a>
+    <nav class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">🎓 Event Manager</a>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Super Administrateur</div>
+                </div>
+                <div class="user-avatar-modern"><?php echo strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSION['nom'], 0, 1)); ?></div>
+                <a href="../auth/logout.php" class="btn btn-ghost btn-sm">Déconnexion</a>
+            </div>
+        </div>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <h1>👤 Créer un administrateur de club</h1>
-            <p>Créez un nouveau compte administrateur pour gérer un club</p>
-        </div>
+    <aside class="sidebar-modern">
+        <nav class="sidebar-nav-modern">
+            <div class="sidebar-section-modern">
+                <div class="sidebar-title-modern">Administration</div>
+                <ul class="sidebar-nav-modern">
+                    <li class="sidebar-nav-item-modern">
+                        <a href="dashboard.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📊</div>
+                            Tableau de bord
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="gerer_clubs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">🏛️</div>
+                            Gérer les clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="liste_admins.php" class="sidebar-nav-link-modern active">
+                            <div class="sidebar-nav-icon-modern">👥</div>
+                            Admins des clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="evenements.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📅</div>
+                            Les événements
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="utilisateurs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">👤</div>
+                            Les utilisateurs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="emails.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📧</div>
+                            Envoyer un email
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="validations.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">✅</div>
+                            Validations
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
 
-        <?php if ($success): ?>
-            <div class="success-message">
-                ✅ <strong>Administrateur créé avec succès !</strong><br>
-                L'administrateur a été créé et peut maintenant se connecter.
+    <div class="layout">
+        <main class="main-content">
+            <div class="page-title">
+                <div>
+                    <h1>Créer un administrateur</h1>
+                    <p>Ajoutez un nouvel organisateur de club</p>
+                </div>
+                <a href="liste_admins.php" class="btn btn-ghost">
+                    ← Retour à la liste
+                </a>
             </div>
-            
-            <div class="credentials-box">
-                <h4>🔑 Identifiants de connexion</h4>
-                <p><strong>Email :</strong> <?php echo htmlspecialchars($email); ?></p>
-                <p><strong>Mot de passe temporaire :</strong> <?php echo htmlspecialchars($mot_de_passe_temporaire); ?></p>
-                <p style="color: #e65100; font-size: 0.9em; margin-top: 10px;">
-                    ⚠️ <strong>Important :</strong> Transmettez ces identifiants à l'administrateur. 
-                    Il devra changer son mot de passe lors de sa première connexion.
-                </p>
-            </div>
-            
-            <div class="form-actions">
-                <a href="liste_admins.php" class="btn btn-primary">Voir tous les administrateurs</a>
-                <a href="creer_admin_club.php" class="btn btn-secondary">Créer un autre administrateur</a>
-            </div>
-        <?php else: ?>
-            <?php if (!empty($errors['general'])): ?>
-                <div class="error" style="background: #ffebee; border: 1px solid #f44336; color: #c62828; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                    <?php echo htmlspecialchars($errors['general']); ?>
+
+            <?php if ($success): ?>
+                <div class="alert-modern alert-success-modern">
+                    <div class="alert-icon-modern">✅</div>
+                    <div class="alert-content-modern">
+                        <div class="alert-title-modern">Succès</div>
+                        <div class="alert-message-modern">
+                            Administrateur créé avec succès !<br>
+                            <strong>Mot de passe temporaire :</strong> <?php echo htmlspecialchars($mot_de_passe_temporaire ?? ''); ?>
+                        </div>
+                    </div>
                 </div>
             <?php endif; ?>
 
-            <form method="POST" id="adminForm">
-                <div class="form-section">
-                    <h3>📝 Informations personnelles</h3>
-                    
-                    <div class="form-group">
-                        <label for="nom">Nom *</label>
-                        <input type="text" 
-                               id="nom" 
-                               name="nom" 
-                               placeholder="Ex: Dupont" 
-                               required
-                               maxlength="50"
-                               value="<?php echo htmlspecialchars($nom); ?>">
-                        <?php if (isset($errors['nom'])): ?>
-                            <span class="error"><?php echo htmlspecialchars($errors['nom']); ?></span>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="prenom">Prénom *</label>
-                        <input type="text" 
-                               id="prenom" 
-                               name="prenom" 
-                               placeholder="Ex: Jean" 
-                               required
-                               maxlength="50"
-                               value="<?php echo htmlspecialchars($prenom); ?>">
-                        <?php if (isset($errors['prenom'])): ?>
-                            <span class="error"><?php echo htmlspecialchars($errors['prenom']); ?></span>
-                        <?php endif; ?>
+            <?php if (isset($errors['general'])): ?>
+                <div class="alert-modern alert-error-modern">
+                    <div class="alert-icon-modern">❌</div>
+                    <div class="alert-content-modern">
+                        <div class="alert-title-modern">Erreur</div>
+                        <div class="alert-message-modern"><?php echo htmlspecialchars($errors['general']); ?></div>
                     </div>
                 </div>
+            <?php endif; ?>
 
-                <div class="form-section">
-                    <h3>📧 Informations de connexion</h3>
-                    
-                    <div class="info-box">
-                        <strong>ℹ️ Information :</strong> Un mot de passe temporaire sera généré automatiquement. 
-                        L'administrateur devra le changer lors de sa première connexion.
+            <div class="form-section-modern">
+                <h3>Informations de l'administrateur</h3>
+                <form method="POST" class="form-modern">
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Nom *</label>
+                            <input type="text" name="nom" class="form-input-modern" 
+                                   value="<?php echo htmlspecialchars($nom); ?>" required>
+                            <?php if (isset($errors['nom'])): ?>
+                                <div class="form-error-modern"><?php echo htmlspecialchars($errors['nom']); ?></div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Prénom *</label>
+                            <input type="text" name="prenom" class="form-input-modern" 
+                                   value="<?php echo htmlspecialchars($prenom); ?>" required>
+                            <?php if (isset($errors['prenom'])): ?>
+                                <div class="form-error-modern"><?php echo htmlspecialchars($errors['prenom']); ?></div>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" 
-                               id="email" 
-                               name="email" 
-                               placeholder="Ex: jean.dupont@email.com" 
-                               required
-                               maxlength="100"
-                               value="<?php echo htmlspecialchars($email); ?>">
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Email *</label>
+                        <input type="email" name="email" class="form-input-modern" 
+                               value="<?php echo htmlspecialchars($email); ?>" required>
                         <?php if (isset($errors['email'])): ?>
-                            <span class="error"><?php echo htmlspecialchars($errors['email']); ?></span>
+                            <div class="form-error-modern"><?php echo htmlspecialchars($errors['email']); ?></div>
                         <?php endif; ?>
                     </div>
 
-                    <div class="form-group">
-                        <label for="telephone">Téléphone (optionnel)</label>
-                        <input type="tel" 
-                               id="telephone" 
-                               name="telephone" 
-                               placeholder="Ex: 0123456789" 
-                               maxlength="20"
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Téléphone</label>
+                        <input type="tel" name="telephone" class="form-input-modern" 
                                value="<?php echo htmlspecialchars($telephone); ?>">
                         <?php if (isset($errors['telephone'])): ?>
-                            <span class="error"><?php echo htmlspecialchars($errors['telephone']); ?></span>
+                            <div class="form-error-modern"><?php echo htmlspecialchars($errors['telephone']); ?></div>
                         <?php endif; ?>
                     </div>
-                </div>
 
-                <div class="form-actions">
-                    <a href="liste_admins.php" class="btn btn-secondary">Annuler</a>
-                    <button type="submit" class="btn btn-primary">
-                        ✓ Créer l'administrateur
-                    </button>
-                </div>
-            </form>
-        <?php endif; ?>
+                    <div class="info-box">
+                        <div class="info-icon">ℹ️</div>
+                        <div class="info-content">
+                            <strong>Informations importantes :</strong>
+                            <ul>
+                                <li>Un mot de passe temporaire sera généré automatiquement</li>
+                                <li>L'administrateur recevra ses identifiants par email</li>
+                                <li>Il pourra modifier son mot de passe lors de sa première connexion</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-actions-modern">
+                        <a href="liste_admins.php" class="btn btn-ghost">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">➕</span>
+                            Créer l'administrateur
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
     </div>
-
-    <script>
-        // Confirmation avant de quitter si formulaire modifié
-        let formModified = false;
-        document.getElementById('adminForm').addEventListener('input', function() {
-            formModified = true;
-        });
-
-        window.addEventListener('beforeunload', function(e) {
-            if (formModified) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
-
-        document.getElementById('adminForm').addEventListener('submit', function() {
-            formModified = false;
-        });
-    </script>
 </body>
 </html>

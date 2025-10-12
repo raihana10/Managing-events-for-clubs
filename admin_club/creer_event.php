@@ -151,364 +151,68 @@ if (empty($_SESSION['form_token'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un Événement</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            margin: 0; 
-            background: #f5f7fa; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .navbar {
-            background: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 0;
-            left: 250px;
-            right: 0;
-            z-index: 100;
-        }
-        
-        .navbar-brand {
-            font-size: 1.5em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .sidebar {
-            width: 250px;
-            background: white;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            overflow-y: auto;
-            padding: 20px 0;
-        }
-        
-        .nav-section {
-            margin-bottom: 30px;
-        }
-        
-        .nav-title {
-            padding: 0 20px;
-            font-size: 0.75em;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: #999;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-        
-        .nav-list {
-            list-style: none;
-        }
-        
-        .nav-item {
-            margin: 2px 0;
-        }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: #555;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .nav-link:hover {
-            background: #f5f7fa;
-            color: #667eea;
-        }
-        
-        .nav-link.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-right: 3px solid #764ba2;
-        }
-        
-        .nav-icon {
-            margin-right: 10px;
-            font-size: 1.2em;
-        }
-        
-        .main-content {
-            margin-left: 250px;
-            margin-top: 70px;
-            flex: 1;
-            padding: 30px;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        
-        .page-header {
-            margin-bottom: 30px;
-        }
-        
-        .page-header h1 {
-            font-size: 2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .page-header p {
-            color: #666;
-        }
-        
-        .form-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        
-        .form-section h3 {
-            color: #667eea;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
-        }
-        
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .file-upload {
-            border: 2px dashed #e0e0e0;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .file-upload:hover {
-            border-color: #667eea;
-            background: #f9f9ff;
-        }
-        
-        .file-upload input[type="file"] {
-            display: none;
-        }
-        .file-upload-content { display:flex; flex-direction:column; align-items:center; gap:8px; }
-        .file-upload-icon {
-            font-size: 2.8em;
-            margin-bottom: 0;
-        }
+    <title>Créer un Événement - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        .file-upload-text { color: #333; }
-        .file-upload-hint { font-size: 0.9em; color: #666; margin-top: 5px; }
-
-        .image-preview {
-            max-width: 100%;
-            max-height: 250px;
-            margin: 15px auto 0;
-            border-radius: 8px;
-            display: none;
-            object-fit: contain;
-        }
-
-        /* When a preview is visible, hide the helper text/icon */
-        .file-upload.has-preview .file-upload-content { display: none; }
-        .file-upload.has-preview .image-preview { display: block; }
-        
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-        }
-        
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #555;
-        }
-        
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-        
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-        
-        .info-box strong {
-            color: #1565c0;
-        }
-        
-        .char-counter {
-            text-align: right;
-            font-size: 0.85em;
-            color: #999;
-            margin-top: 5px;
-        }
-
-        .input-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .input-icon {
-            font-size: 1.2em;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <nav class="nav-section">
-            <div class="nav-title">Gestion</div>
-            <ul class="nav-list">
-                <li class="nav-item">
-                    <a href="dashboard.php" class="nav-link">
-                        <span class="nav-icon">▪</span>
+    <aside class="sidebar-modern">
+        <nav class="sidebar-section-modern">
+            <div class="sidebar-title-modern">Gestion</div>
+            <ul class="sidebar-nav-modern">
+                <li class="sidebar-nav-item-modern">
+                    <a href="dashboard.php" class="sidebar-nav-link-modern">
+                        <span class="sidebar-nav-icon-modern">📊</span>
                         Tableau de bord
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="mes_evenements.php" class="nav-link">
-                        <span class="nav-icon">▪</span>
+                <li class="sidebar-nav-item-modern">
+                    <a href="mes_evenements.php" class="sidebar-nav-link-modern">
+                        <span class="sidebar-nav-icon-modern">📅</span>
                         Mes événements
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="creer_event.php" class="nav-link active">
-                        <span class="nav-icon">▪</span>
+                <li class="sidebar-nav-item-modern">
+                    <a href="creer_event.php" class="sidebar-nav-link-modern active">
+                        <span class="sidebar-nav-icon-modern">➕</span>
                         Créer événement
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="membres.php" class="nav-link">
-                        <span class="nav-icon">▪</span>
+                <li class="sidebar-nav-item-modern">
+                    <a href="membres.php" class="sidebar-nav-link-modern">
+                        <span class="sidebar-nav-icon-modern">👥</span>
                         Membres
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="envoyer_email.php" class="nav-link">
-                        <span class="nav-icon">▪</span>
+                <li class="sidebar-nav-item-modern">
+                    <a href="envoyer_email.php" class="sidebar-nav-link-modern">
+                        <span class="sidebar-nav-icon-modern">✉️</span>
                         Communication
                     </a>
                 </li>
             </ul>
         </nav>
 
-        <nav class="nav-section">
-            <div class="nav-title">Personnel</div>
-            <ul class="nav-list">
-                <li class="nav-item">
-                    <a href="../utilisateur/mes_inscriptions.php" class="nav-link">
-                        <span class="nav-icon">▪</span>
+        <nav class="sidebar-section-modern">
+            <div class="sidebar-title-modern">Personnel</div>
+            <ul class="sidebar-nav-modern">
+                <li class="sidebar-nav-item-modern">
+                    <a href="../utilisateur/mes_inscriptions.php" class="sidebar-nav-link-modern">
+                        <span class="sidebar-nav-icon-modern">📋</span>
                         Mes inscriptions
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="../utilisateur/clubs.php" class="nav-link">
-                        <span class="nav-icon">▪</span>
+                <li class="sidebar-nav-item-modern">
+                    <a href="../utilisateur/clubs.php" class="sidebar-nav-link-modern">
+                        <span class="sidebar-nav-icon-modern">🏢</span>
                         Autres clubs
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="parametres.php" class="nav-link">
-                        <span class="nav-icon">▪</span>
+                <li class="sidebar-nav-item-modern">
+                    <a href="parametres.php" class="sidebar-nav-link-modern">
+                        <span class="sidebar-nav-icon-modern">⚙️</span>
                         Paramètres
                     </a>
                 </li>
@@ -517,206 +221,218 @@ if (empty($_SESSION['form_token'])) {
     </aside>
 
     <div class="main-content">
-        <nav class="navbar">
-            <div class="navbar-brand">🎓 GestionEvents</div>
-            <a href="dashboard.php" class="btn btn-secondary">← Retour au dashboard</a>
-        </nav>
-
-        <div class="container">
-            <div class="page-header">
-                <h1>📅 Créer un nouvel événement</h1>
-                <p>Remplissez les informations de l'événement</p>
-            </div>
-
-                <?php if (!empty($error)): ?>
-                    <div class="info-box" style="background:#fdecea; border-left-color:#f44336; color:#611a15; margin-bottom:15px;">
-                        <strong>Erreur :</strong> <?php echo htmlspecialchars($error); ?>
-                    </div>
-                <?php endif; ?>
-                <?php if (!empty($success)): ?>
-                    <div class="info-box" style="background:#e8f5e9; border-left-color:#4caf50; color:#144620; margin-bottom:15px;">
-                        <strong>Succès :</strong> <?php echo htmlspecialchars($success); ?>
-                    </div>
-                <?php endif; ?>
-
-            <form method="POST" enctype="multipart/form-data" id="eventForm">
-                <input type="hidden" name="form_token" value="<?php echo htmlspecialchars($_SESSION['form_token'] ?? ''); ?>">
-                <div class="form-section">
-                    <h3>📝 Informations générales</h3>
-                    
-                    <div class="form-group">
-                        <label for="nom_evenement">Nom de l'événement </label>
-                        <input type="text" 
-                               id="nom_evenement" 
-                               name="nom_evenement" 
-                               placeholder="Ex: Conférence sur l'IA" 
-                               required
-                               maxlength="200">
-                        <div class="char-counter">
-                            <span id="nom-counter">0</span>/200
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_club">Club organisateur *</label>
-                        <select id="id_club" name="id_club" required>
-                            <option value="">-- Sélectionner un club --</option>
-                            <?php foreach ($clubs as $club): ?>
-                                <option value="<?php echo $club['IdClub']; ?>">
-                                    <?php echo htmlspecialchars($club['NomClub']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="type">Type d'événement *</label>
-                        <select id="type" name="type" required>
-                            <option value="">-- Sélectionner un type --</option>
-                            <option value="Conférence">Conférence</option>
-                            <option value="Atelier">Atelier</option>
-                            <option value="Compétition">Compétition</option>
-                            <option value="Formation">Formation</option>
-                            <option value="Séminaire">Séminaire</option>
-                            <option value="Sortie">Sortie</option>
-                            <option value="AG">Assemblée Générale</option>
-                            <option value="Soirée">Soirée Traditionnelle</option>
-                            <option value="Autre">Autre</option>
-                        </select>
-                        <input type="text" id="type_autre" name="type_autre" placeholder="Précisez le type d'événement" style="display:none; margin-top:8px;">
+        <header class="header-modern">
+            <div class="header-content">
+                <a href="dashboard.php" class="logo-modern">🎓 GestionEvents</a>
+                <div class="header-right">
+                    <a href="dashboard.php" class="btn btn-secondary">← Retour</a>
+                    <div class="user-avatar-modern">
+                        <?php echo strtoupper(substr($_SESSION['prenom'] ?? 'U', 0, 1)); ?>
                     </div>
                 </div>
+            </div>
+        </header>
+            <div class="container">
+                <div class="page-header">
+                    <h1>📅 Créer un nouvel événement</h1>
+                    <p>Remplissez les informations de l'événement</p>
+                </div>
 
-                <div class="form-section">
-                    <h3>📍 Lieu et date</h3>
-                    
-                    <div class="form-group">
-                        <label for="lieu">Lieu *</label>
-                            <select id="lieu" name="lieu" required>
-                            <option value="">-- Sélectionner un lieu --</option>
-                            <option value="Amphi">Amphi</option>
-                            <option value="salle de lecture">Salle de lecture</option>
-                            <option value="Salle 001">Salle 001</option>
-                            <option value="Salle 002">Salle 002</option>
-                            <option value="Salle 003">Salle 003</option>
-                            <option value="Salle 004">Salle 004</option>
-                            <option value="Salle 005">Salle 005</option>
-                            <option value="Salle 101">Salle 101</option>
-                            <option value="Salle 102">Salle 102</option>
-                            <option value="Salle 103">Salle 103</option>
-                            <option value="Salle 104">Salle 104</option>
-                            <option value="Salle 105">Salle 105</option>
-                            <option value="Salle 200">Salle 200</option>
-                            <option value="Salle 201">Salle 201</option>
-                            <option value="Salle 202">Salle 202</option>
-                            <option value="Salle 203">Salle 203</option>
-                            <option value="Salle 204">Salle 204</option>
-                            <option value="Salle 205">Salle 205</option>
-                            <option value="Extérieur">Extérieur</option>
-                            <option value="En ligne">En ligne</option>
+                    <?php if (!empty($error)): ?>
+                        <div class="alert-error-modern">
+                            <strong>Erreur :</strong> <?php echo htmlspecialchars($error); ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($success)): ?>
+                        <div class="alert-success-modern">
+                            <strong>Succès :</strong> <?php echo htmlspecialchars($success); ?>
+                        </div>
+                    <?php endif; ?>
 
-                            <option value="Autre">Autre</option>
-                        </select>
-                        <input type="text" id="lieu_autre" name="lieu_autre" placeholder="Précisez le lieu" style="display:none; margin-top:8px;">
-                    </div>
-
-                    <!-- inscription single label and three price fields (moved below capacity in layout) -->
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="date">Date de l'événement *</label>
-                            <input type="date" 
-                                   id="date" 
-                                   name="date" 
-                                   required>
+                <form method="POST" enctype="multipart/form-data" id="eventForm">
+                    <input type="hidden" name="form_token" value="<?php echo htmlspecialchars($_SESSION['form_token'] ?? ''); ?>">
+                    <div class="form-section-modern">
+                        <h3 class="form-section-title-modern">📝 Informations générales</h3>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern" for="nom_evenement">Nom de l'événement </label>
+                            <input type="text" 
+                                id="nom_evenement" 
+                                name="nom_evenement" class="form-input-modern"
+                                placeholder="Ex: Conférence sur l'IA" 
+                                required
+                                maxlength="200">
+                            <div class="char-counter">
+                                <span id="nom-counter">0</span>/200
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="participant">Participants</label>
-                            <select id="participant" name="participant">
-                                <option value="Adhérents">Adhérents</option>
-                                <option value="Membres uniquement">Tous les Ensatiens</option>
-                                <option value="Tous">Ensatiens + Externes </option>
+                        <div class="form-group-modern">
+                            <label class="form-label-modern" for="id_club">Club organisateur *</label>
+                            <select id="id_club" name="id_club" class="form-select-modern" required>
+                                <option value="">-- Sélectionner un club --</option>
+                                <?php foreach ($clubs as $club): ?>
+                                    <option value="<?php echo $club['IdClub']; ?>">
+                                        <?php echo htmlspecialchars($club['NomClub']); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
-                    </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="heure_debut">Heure de début *</label>
-                            <input type="time" 
-                                   id="heure_debut" 
-                                   name="heure_debut" 
-                                   required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="heure_fin">Heure de fin *</label>
-                            <input type="time" 
-                                   id="heure_fin" 
-                                   name="heure_fin" 
-                                   required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="capacite_max">Capacité maximale</label>
-                        <input type="number" 
-                               id="capacite_max" 
-                               name="capacite_max" 
-                               placeholder="Ex: 50" 
-                               min="1"
-                               max="1000">
-                        <div class="info-box" style="margin-top: 10px;">
-                            <strong>ℹ️ Conseil :</strong> Laissez vide pour une capacité illimitée
+                        <div class="form-group-modern">
+                            <label class="form-label-modern" for="type">Type d'événement *</label>
+                            <select id="type" name="type" class="form-select-modern" required>
+                                <option value="">-- Sélectionner un type --</option>
+                                <option value="Conférence">Conférence</option>
+                                <option value="Atelier">Atelier</option>
+                                <option value="Compétition">Compétition</option>
+                                <option value="Formation">Formation</option>
+                                <option value="Séminaire">Séminaire</option>
+                                <option value="Sortie">Sortie</option>
+                                <option value="AG">Assemblée Générale</option>
+                                <option value="Soirée">Soirée Traditionnelle</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                            <input type="text" id="type_autre" name="type_autre" class="form-input-modern" placeholder="Précisez le type d'événement" style="display:none; margin-top:8px;">
                         </div>
                     </div>
-                    <div class="form-group" id="prix-fields" style="margin-top:10px; display:none;">
-                        <label>Prix selon type de participant</label>
-                        <div style="display:flex; gap:10px; align-items:center;">
-                            <input type="number" step="0.01" min="0" id="prix_adherent" name="prix_adherent" placeholder="Prix adhérent" style="flex:1;">
-                            <input type="number" step="0.01" min="0" id="prix_non_adherent" name="prix_non_adherent" placeholder="Prix non-adhérent" style="flex:1;">
-                            <input type="number" step="0.01" min="0" id="prix_externe" name="prix_externe" placeholder="Prix externe" style="flex:1;">
-                        </div>
-                        <div class="info-box" style="margin-top:8px;">Ces prix seront stockés dans PrixAdherent, PrixNonAdherent, PrixExterne.</div>
-                    </div>
-                    
-                    <div class="form-group full-width">
-                        <label for="description">Description de l'événement</label>
-                        <textarea id="description" name="description" placeholder="Décrivez l'événement, le programme, les intervenants..." maxlength="2000"></textarea>
-                        <div class="char-counter"><span id="desc-counter">0</span>/2000</div>
-                    </div>
-                </div>
 
-                <div class="form-section">
-                    <h3>Affiche de l'événement</h3>
-                    
-                    <div class="form-group">
-                        <label class="file-upload" for="affiche">
-                            <div class="file-upload-content">
-                                
-                                <div class="file-upload-text">
-                                    <div><strong>Cliquez pour télécharger une affiche</strong></div>
-                                    <div class="file-upload-hint">PNG, JPG ou GIF (max 5MB)</div>
-                                </div>
+                    <div class="form-section-modern">
+                        <h3 class="form-section-title-modern">📍 Lieu et date</h3>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern" for="lieu">Lieu *</label>
+                            <select id="lieu" name="lieu" class="form-select-modern" required>
+                                <option value="">-- Sélectionner un lieu --</option>
+                                <option value="Amphi">Amphi</option>
+                                <option value="salle de lecture">Salle de lecture</option>
+                                <option value="Salle 001">Salle 001</option>
+                                <option value="Salle 002">Salle 002</option>
+                                <option value="Salle 003">Salle 003</option>
+                                <option value="Salle 004">Salle 004</option>
+                                <option value="Salle 005">Salle 005</option>
+                                <option value="Salle 101">Salle 101</option>
+                                <option value="Salle 102">Salle 102</option>
+                                <option value="Salle 103">Salle 103</option>
+                                <option value="Salle 104">Salle 104</option>
+                                <option value="Salle 105">Salle 105</option>
+                                <option value="Salle 200">Salle 200</option>
+                                <option value="Salle 201">Salle 201</option>
+                                <option value="Salle 202">Salle 202</option>
+                                <option value="Salle 203">Salle 203</option>
+                                <option value="Salle 204">Salle 204</option>
+                                <option value="Salle 205">Salle 205</option>
+                                <option value="Extérieur">Extérieur</option>
+                                <option value="En ligne">En ligne</option>
+
+                                <option value="Autre">Autre</option>
+                            </select>
+                            <input type="text" id="lieu_autre" name="lieu_autre" class="form-input-modern" placeholder="Précisez le lieu" style="display:none; margin-top:8px;">
+                        </div>
+
+                        <!-- inscription single label and three price fields (moved below capacity in layout) -->
+
+                        <div class="form-row">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern" for="date">Date de l'événement *</label>
+                                <input type="date" 
+                                    id="date" 
+                                    name="date"
+                                    class="form-input-modern" 
+                                    required>
                             </div>
-                            <input type="file" 
-                                   id="affiche" 
-                                   name="affiche" 
-                                   accept="image/*">
-                            <img id="affiche-preview" class="image-preview" alt="Aperçu de l'affiche">
-                        </label>
+
+                            <div class="form-group-modern">
+                                <label class="form-label-modern" for="participant">Participants</label>
+                                <select id="participant" name="participant" class="form-select-modern">
+                                    <option value="Adhérents">Adhérents</option>
+                                    <option value="Membres uniquement">Tous les Ensatiens</option>
+                                    <option value="Tous">Ensatiens + Externes </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group-modern">
+                                <label class="form-label-modern" for="heure_debut">Heure de début *</label>
+                                <input type="time" 
+                                    id="heure_debut" 
+                                    name="heure_debut" 
+                                    class="form-input-modern"
+                                    required>
+                            </div>
+
+                            <div class="form-group-modern">
+                                <label class="form-label-modern" for="heure_fin">Heure de fin *</label>
+                                <input type="time" 
+                                    id="heure_fin" 
+                                    name="heure_fin" 
+                                    class="form-input-modern"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern" for="capacite_max">Capacité maximale</label>
+                            <input type="number" 
+                                id="capacite_max" 
+                                name="capacite_max"
+                                class="form-input-modern" 
+                                placeholder="Ex: 50" 
+                                min="1"
+                                max="1000">
+                            <div class="info-box" style="margin-top: 10px;">
+                                <strong>ℹ️ Conseil :</strong> Laissez vide pour une capacité illimitée
+                            </div>
+                        </div>
+                        <div class="form-group-modern" id="prix-fields" style="margin-top:10px; display:none;">
+                            <label class="form-label-modern">Prix selon type de participant</label>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="number" step="0.01" min="0" id="prix_adherent" name="prix_adherent"
+                                class="form-input-modern" placeholder="Prix adhérent" style="flex:1;">
+                                <input type="number" step="0.01" min="0" id="prix_non_adherent" name="prix_non_adherent" class="form-input-modern" placeholder="Prix non-adhérent" style="flex:1;">
+                                <input type="number" step="0.01" min="0" id="prix_externe" name="prix_externe" class="form-input-modern" placeholder="Prix externe" style="flex:1;">
+                            </div>
+                            <div class="info-box" style="margin-top:8px;">Ces prix seront stockés dans PrixAdherent, PrixNonAdherent, PrixExterne.</div>
+                        </div>
+
+                        <div class="form-group-modern full-width">
+                            <label class="form-label-modern" for="description">Description de l'événement</label>
+                            <textarea id="description" name="description" class="form-textarea-modern" placeholder="Décrivez l'événement, le programme, les intervenants..." maxlength="2000"></textarea>
+                            <div class="char-counter"><span id="desc-counter">0</span>/2000</div>
+                        </div>
                     </div>
-                </div>
 
-                
+                    <div class="form-section-modern">
+                        <h3 class="form-section-title-modern">Affiche de l'événement</h3>
 
-                <div class="form-actions">
-                    <a href="mes_evenements.php" class="btn btn-secondary">Annuler</a>
-                    <button type="submit" class="btn btn-primary">✓ Créer l'événement</button>
-                </div>
-            </form>
-        </div>
+                        <div class="form-group-modern">
+                            <label class="file-upload "  for="affiche">
+                                <div class="file-upload-content">
+                                    
+                                    <div class="file-upload-text">
+                                        <div><strong>Cliquez pour télécharger une affiche</strong></div>
+                                        <div class="file-upload-hint">PNG, JPG ou GIF (max 5MB)</div>
+                                    </div>
+                                </div>
+                                <input type="file" 
+                                    id="affiche" 
+                                    name="affiche" 
+                                    class="form-input-modern"
+                                    accept="image/*">
+                                <img id="affiche-preview" class="image-preview" alt="Aperçu de l'affiche">
+                            </label>
+                        </div>
+                    </div>
+
+                    
+
+                    <div class="form-actions">
+                        <a href="mes_evenements.php" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">✓ Créer l'événement</button>
+                    </div>
+                </form>
+            </div> 
     </div>
 
     <?php if (!empty($_SESSION['event_preview']) && $_SERVER['REQUEST_METHOD'] !== 'POST'): ?>
@@ -960,5 +676,7 @@ if (empty($_SESSION['form_token'])) {
             }
         });
     </script>
+   
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>

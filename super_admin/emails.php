@@ -157,447 +157,213 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Envoi d'emails</title>
-    <link rel="stylesheet" href="../frontend/css.css">
-    <style>
-        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar {
-            background: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .navbar-brand {
-            font-size: 1.5em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .page-header {
-            margin-bottom: 30px;
-        }
-        .page-header h1 {
-            font-size: 2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .page-header p {
-            color: #666;
-        }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #555;
-        }
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        .alert-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-left: 4px solid #4caf50;
-        }
-        .alert-error {
-            background: #ffebee;
-            color: #c62828;
-            border-left: 4px solid #f44336;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-        .stat-label {
-            color: #666;
-            font-size: 0.9em;
-        }
-        .form-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .form-section h3 {
-            color: #667eea;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
-        }
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 150px;
-        }
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .checkbox-item:hover {
-            border-color: #667eea;
-            background: #f9f9ff;
-        }
-        .checkbox-item input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.2);
-        }
-        .checkbox-item.selected {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
-        .error {
-            color: #f44336;
-            font-size: 0.9em;
-            margin-top: 5px;
-            display: block;
-        }
-        .char-counter {
-            text-align: right;
-            font-size: 0.85em;
-            color: #999;
-            margin-top: 5px;
-        }
-        .history-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .history-section h3 {
-            color: #667eea;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .email-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            transition: all 0.3s;
-        }
-        .email-item:hover {
-            background: #f9f9f9;
-        }
-        .email-info h4 {
-            margin: 0 0 5px 0;
-            color: #333;
-        }
-        .email-info p {
-            margin: 0;
-            color: #666;
-            font-size: 0.9em;
-        }
-        .email-date {
-            color: #999;
-            font-size: 0.85em;
-        }
-        .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 500;
-        }
-        .badge.general {
-            background: #e3f2fd;
-            color: #2196f3;
-        }
-        .badge.notification {
-            background: #e8f5e9;
-            color: #4caf50;
-        }
-        @media (max-width: 768px) {
-            .checkbox-group {
-                grid-template-columns: 1fr;
-            }
-            .form-actions {
-                flex-direction: column;
-                gap: 15px;
-            }
-        }
-    </style>
+    <title>Envoi d'emails - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">🎓 GestionEvents</div>
-        <a href="dashboard.php" class="btn btn-secondary">Retour au dashboard</a>
+    <nav class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">🎓 Event Manager</a>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Super Administrateur</div>
+                </div>
+                <div class="user-avatar-modern"><?php echo strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSION['nom'], 0, 1)); ?></div>
+                <a href="../auth/logout.php" class="btn btn-ghost btn-sm">Déconnexion</a>
+            </div>
+        </div>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <h1>📧 Envoi d'emails</h1>
-            <p>Envoyez des emails aux organisateurs de clubs</p>
-        </div>
+    <aside class="sidebar-modern">
+        <nav class="sidebar-nav-modern">
+            <div class="sidebar-section-modern">
+                <div class="sidebar-title-modern">Administration</div>
+                <ul class="sidebar-nav-modern">
+                    <li class="sidebar-nav-item-modern">
+                        <a href="dashboard.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📊</div>
+                            Tableau de bord
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="gerer_clubs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">🏛️</div>
+                            Gérer les clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="liste_admins.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">👥</div>
+                            Admins des clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="evenements.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📅</div>
+                            Les événements
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="utilisateurs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">👤</div>
+                            Les utilisateurs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="emails.php" class="sidebar-nav-link-modern active">
+                            <div class="sidebar-nav-icon-modern">📧</div>
+                            Envoyer un email
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="validations.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">✅</div>
+                            Validations
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
 
-        <?php if ($success): ?>
-            <div class="alert alert-success">
-                ✅ <?php echo htmlspecialchars($success_message); ?>
+    <div class="layout">
+        <main class="main-content">
+            <div class="page-title">
+                <h1>Envoi d'emails</h1>
+                <p>Communiquez avec les organisateurs de clubs</p>
             </div>
-        <?php endif; ?>
 
-        <?php if (!empty($errors['general'])): ?>
-            <div class="alert alert-error">
-                ❌ <?php echo htmlspecialchars($errors['general']); ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Statistiques -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $stats['total_emails']; ?></div>
-                <div class="stat-label">Emails envoyés</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $stats['total_destinataires']; ?></div>
-                <div class="stat-label">Destinataires uniques</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value"><?php echo $stats['emails_30j']; ?></div>
-                <div class="stat-label">Ce mois</div>
-            </div>
-        </div>
-
-        <!-- Formulaire d'envoi -->
-        <div class="form-section">
-            <h3>✉️ Nouvel email</h3>
-            
-            <form method="POST" id="emailForm">
-                <div class="form-group">
-                    <label>Destinataires *</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item" for="tous_organisateurs">
-                            <input type="checkbox" id="tous_organisateurs" name="destinataires[]" value="tous_organisateurs">
-                            <span>📢 Tous les organisateurs (<?php echo count($organisateurs); ?>)</span>
-                        </label>
-                        
-                        <?php foreach ($organisateurs as $org): ?>
-                            <label class="checkbox-item" for="org_<?php echo $org['IdUtilisateur']; ?>">
-                                <input type="checkbox" id="org_<?php echo $org['IdUtilisateur']; ?>" 
-                                       name="destinataires[]" value="<?php echo $org['IdUtilisateur']; ?>">
-                                <span><?php echo htmlspecialchars($org['Prenom'] . ' ' . $org['Nom']); ?><br>
-                                    <small><?php echo htmlspecialchars($org['Email']); ?></small>
-                                </span>
-                            </label>
-                        <?php endforeach; ?>
+            <?php if (isset($success_message)): ?>
+                <div class="alert-modern alert-success-modern">
+                    <div class="alert-icon-modern">✅</div>
+                    <div class="alert-content-modern">
+                        <div class="alert-title-modern">Succès</div>
+                        <div class="alert-message-modern"><?php echo htmlspecialchars($success_message); ?></div>
                     </div>
-                    <?php if (isset($errors['destinataires'])): ?>
-                        <span class="error"><?php echo htmlspecialchars($errors['destinataires']); ?></span>
-                    <?php endif; ?>
                 </div>
+            <?php endif; ?>
 
-                <div class="form-group">
-                    <label for="sujet">Sujet *</label>
-                    <input type="text" 
-                           id="sujet" 
-                           name="sujet" 
-                           placeholder="Ex: Information importante" 
-                           required
-                           maxlength="200"
-                           value="<?php echo htmlspecialchars($sujet); ?>">
-                    <div class="char-counter">
-                        <span id="sujet-counter">0</span>/200
-                    </div>
-                    <?php if (isset($errors['sujet'])): ?>
-                        <span class="error"><?php echo htmlspecialchars($errors['sujet']); ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <div class="form-group">
-                    <label for="message">Message *</label>
-                    <textarea id="message" 
-                              name="message" 
-                              placeholder="Tapez votre message ici..." 
-                              required
-                              maxlength="5000"><?php echo htmlspecialchars($message); ?></textarea>
-                    <div class="char-counter">
-                        <span id="message-counter">0</span>/5000
-                    </div>
-                    <?php if (isset($errors['message'])): ?>
-                        <span class="error"><?php echo htmlspecialchars($errors['message']); ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('emailForm').reset();">
-                        Effacer
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        📤 Envoyer l'email
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Historique des emails -->
-        <?php if (!empty($emails_recents)): ?>
-            <div class="history-section">
-                <h3>📋 Emails récents</h3>
-                
-                <?php foreach ($emails_recents as $email): ?>
-                    <div class="email-item">
-                        <div class="email-info">
-                            <h4><?php echo htmlspecialchars($email['Objet']); ?></h4>
-                            <p>
-                                <strong>À :</strong> <?php echo htmlspecialchars($email['DestinataireNom']); ?>
-                                (<?php echo htmlspecialchars($email['DestinataireEmail']); ?>)
-                            </p>
-                        </div>
-                        <div class="email-date">
-                            <?php echo date('d/m/Y à H:i', strtotime($email['DateEnvoi'])); ?>
-                            <br>
-                            <span class="badge <?php echo $email['TypeEmail'] == 'general' ? 'general' : 'notification'; ?>">
-                                <?php echo ucfirst($email['TypeEmail']); ?>
-                            </span>
+            <?php if (!empty($errors)): ?>
+                <div class="alert-modern alert-error-modern">
+                    <div class="alert-icon-modern">❌</div>
+                    <div class="alert-content-modern">
+                        <div class="alert-title-modern">Erreur</div>
+                        <div class="alert-message-modern">
+                            <?php foreach ($errors as $error): ?>
+                                <div><?php echo htmlspecialchars($error); ?></div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
-                <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Statistiques des emails -->
+            <div class="stats-grid-modern">
+                <div class="stat-card-modern">
+                    <div class="stat-icon-modern">📧</div>
+                    <div class="stat-content-modern">
+                        <div class="stat-value-modern"><?php echo $stats['total_emails']; ?></div>
+                        <div class="stat-label-modern">Emails envoyés</div>
+                    </div>
+                </div>
+                <div class="stat-card-modern">
+                    <div class="stat-icon-modern">👥</div>
+                    <div class="stat-content-modern">
+                        <div class="stat-value-modern"><?php echo $stats['total_destinataires']; ?></div>
+                        <div class="stat-label-modern">Destinataires uniques</div>
+                    </div>
+                </div>
+                <div class="stat-card-modern">
+                    <div class="stat-icon-modern">📅</div>
+                    <div class="stat-content-modern">
+                        <div class="stat-value-modern"><?php echo $stats['emails_30j']; ?></div>
+                        <div class="stat-label-modern">Ce mois-ci</div>
+                    </div>
+                </div>
             </div>
-        <?php endif; ?>
+
+            <!-- Formulaire d'envoi d'email -->
+            <div class="form-section-modern">
+                <h3>Nouvel email</h3>
+                <form method="POST" class="form-modern">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Destinataires</label>
+                        <select name="destinataires[]" multiple class="form-select-modern" required>
+                            <option value="all">Tous les organisateurs</option>
+                            <?php foreach ($organisateurs as $org): ?>
+                                <option value="<?php echo $org['IdUtilisateur']; ?>" 
+                                        <?php echo (isset($_POST['destinataires']) && in_array($org['IdUtilisateur'], $_POST['destinataires'])) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($org['Nom'] . ' ' . $org['Prenom'] . ' (' . $org['Email'] . ')'); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-help-modern">Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs destinataires</div>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Sujet</label>
+                        <input type="text" name="sujet" class="form-input-modern" 
+                               value="<?php echo htmlspecialchars($sujet); ?>" required>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Message</label>
+                        <textarea name="message" class="form-textarea-modern" rows="8" required><?php echo htmlspecialchars($message); ?></textarea>
+                    </div>
+
+                    <div class="form-actions-modern">
+                        <button type="submit" name="envoyer_email" class="btn btn-primary">
+                            <span class="btn-icon">📧</span>
+                            Envoyer l'email
+                        </button>
+                    </div>
+                </form>
+        </div>
+
+            <!-- Historique des emails récents -->
+            <?php if (!empty($emails_recents)): ?>
+                <div class="form-section-modern">
+                    <h3>Emails récents</h3>
+                    <div class="table-modern">
+                        <div class="table-header-modern">
+                            <div class="table-title-modern">Historique des envois</div>
+                        </div>
+                        <div class="table-content-modern">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Destinataire</th>
+                                        <th>Sujet</th>
+                                        <th>Type</th>
+                                        <th>Date d'envoi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($emails_recents as $email): ?>
+                                        <tr>
+                                            <td>
+                                                <div class="user-info">
+                                                    <div class="user-name"><?php echo htmlspecialchars($email['DestinataireNom']); ?></div>
+                                                    <div class="user-email"><?php echo htmlspecialchars($email['DestinataireEmail']); ?></div>
+                                                </div>
+                                            </td>
+                                            <td><?php echo htmlspecialchars($email['Objet']); ?></td>
+                                            <td>
+                                                <span class="badge badge-info"><?php echo htmlspecialchars($email['TypeEmail']); ?></span>
+                                            </td>
+                                            <td><?php echo date('d/m/Y H:i', strtotime($email['DateEnvoi'])); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </main>
     </div>
-
-    <script>
-        // Compteur de caractères pour le sujet
-        document.getElementById('sujet').addEventListener('input', function() {
-            document.getElementById('sujet-counter').textContent = this.value.length;
-        });
-
-        // Compteur de caractères pour le message
-        document.getElementById('message').addEventListener('input', function() {
-            document.getElementById('message-counter').textContent = this.value.length;
-        });
-
-        // Gestion des checkboxes
-        document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const item = this.closest('.checkbox-item');
-                if (this.checked) {
-                    item.classList.add('selected');
-                } else {
-                    item.classList.remove('selected');
-                }
-            });
-        });
-
-        // Gestion du "Tous les organisateurs"
-        document.getElementById('tous_organisateurs').addEventListener('change', function() {
-            const individualCheckboxes = document.querySelectorAll('.checkbox-item input[type="checkbox"]:not(#tous_organisateurs)');
-            
-            if (this.checked) {
-                // Décocher tous les autres
-                individualCheckboxes.forEach(cb => {
-                    cb.checked = false;
-                    cb.closest('.checkbox-item').classList.remove('selected');
-                });
-            }
-        });
-
-        // Gestion des checkboxes individuelles
-        document.querySelectorAll('.checkbox-item input[type="checkbox"]:not(#tous_organisateurs)').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    // Décocher "Tous les organisateurs"
-                    document.getElementById('tous_organisateurs').checked = false;
-                    document.getElementById('tous_organisateurs').closest('.checkbox-item').classList.remove('selected');
-                }
-            });
-        });
-
-        // Initialiser les compteurs
-        document.getElementById('sujet-counter').textContent = document.getElementById('sujet').value.length;
-        document.getElementById('message-counter').textContent = document.getElementById('message').value.length;
-    </script>
 </body>
 </html>

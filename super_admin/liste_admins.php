@@ -64,7 +64,6 @@ try {
                 u.Prenom,
                 u.Email,
                 u.DateInscription,
-                /* u.Status, */
                 COUNT(c.IdClub) as nb_clubs_geres,
                 GROUP_CONCAT(c.NomClub SEPARATOR ', ') as clubs_geres
             FROM Utilisateur u
@@ -87,282 +86,136 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrateurs des clubs</title>
-    <link rel="stylesheet" href="../frontend/css.css">
-    <style>
-        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar {
-            background: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .navbar-brand {
-            font-size: 1.5em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .page-header h1 {
-            font-size: 2em;
-            color: #333;
-            margin: 0;
-        }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #555;
-        }
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        .alert-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-left: 4px solid #4caf50;
-        }
-        .alert-error {
-            background: #ffebee;
-            color: #c62828;
-            border-left: 4px solid #f44336;
-        }
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        thead {
-            background: #f5f7fa;
-        }
-        th {
-            padding: 15px;
-            text-align: left;
-            color: #666;
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-        td {
-            padding: 15px;
-            border-top: 1px solid #eee;
-            color: #555;
-        }
-        tbody tr:hover {
-            background: #f9f9f9;
-        }
-        .admin-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        .admin-info {
-            display: flex;
-            align-items: center;
-        }
-        .admin-details h4 {
-            margin: 0 0 5px 0;
-            color: #333;
-        }
-        .admin-details p {
-            margin: 0;
-            color: #666;
-            font-size: 0.9em;
-        }
-        .badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 500;
-        }
-        .badge.success {
-            background: #e8f5e9;
-            color: #4caf50;
-        }
-        .badge.warning {
-            background: #fff3e0;
-            color: #ff9800;
-        }
-        .badge.danger {
-            background: #ffebee;
-            color: #f44336;
-        }
-        .clubs-list {
-            max-width: 200px;
-            font-size: 0.9em;
-        }
-        .clubs-list .club-item {
-            background: #e3f2fd;
-            color: #1565c0;
-            padding: 2px 8px;
-            border-radius: 12px;
-            margin: 2px;
-            display: inline-block;
-            font-size: 0.8em;
-        }
-        .btn-icon {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 0 3px;
-            font-size: 0.9em;
-        }
-        .btn-view {
-            background: #e3f2fd;
-            color: #2196f3;
-        }
-        .btn-view:hover {
-            background: #2196f3;
-            color: white;
-        }
-        .btn-edit {
-            background: #fff3e0;
-            color: #ff9800;
-        }
-        .btn-edit:hover {
-            background: #ff9800;
-            color: white;
-        }
-        .btn-delete {
-            background: #ffebee;
-            color: #f44336;
-        }
-        .btn-delete:hover {
-            background: #f44336;
-            color: white;
-        }
-        .no-admins {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-        .no-admins-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        @media (max-width: 768px) {
-            .table-container {
-                overflow-x: auto;
-            }
-            .page-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: stretch;
-            }
-        }
-    </style>
+    <title>Administrateurs des clubs - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">🎓 GestionEvents</div>
-        <a href="dashboard.php" class="btn btn-secondary">Retour au dashboard</a>
+    <nav class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">🎓 Event Manager</a>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Super Administrateur</div>
+                </div>
+                <div class="user-avatar-modern"><?php echo strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSION['nom'], 0, 1)); ?></div>
+                <a href="../auth/logout.php" class="btn btn-ghost btn-sm">Déconnexion</a>
+            </div>
+        </div>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <h1>👥 Administrateurs des clubs</h1>
-            <a href="creer_admin_club.php" class="btn btn-primary">
-                ➕ Créer un administrateur
-            </a>
-        </div>
-
-        <?php if (isset($success_message)): ?>
-            <div class="alert alert-success">
-                ✅ <?php echo htmlspecialchars($success_message); ?>
+    <aside class="sidebar-modern">
+        <nav class="sidebar-nav-modern">
+            <div class="sidebar-section-modern">
+                <div class="sidebar-title-modern">Administration</div>
+                <ul class="sidebar-nav-modern">
+                    <li class="sidebar-nav-item-modern">
+                        <a href="dashboard.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📊</div>
+                            Tableau de bord
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="gerer_clubs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">🏛️</div>
+                            Gérer les clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="liste_admins.php" class="sidebar-nav-link-modern active">
+                            <div class="sidebar-nav-icon-modern">👥</div>
+                            Admins des clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="evenements.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📅</div>
+                            Les événements
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="utilisateurs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">👤</div>
+                            Les utilisateurs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="emails.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📧</div>
+                            Envoyer un email
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="validations.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">✅</div>
+                            Validations
+                        </a>
+                    </li>
+                </ul>
             </div>
-        <?php endif; ?>
+        </nav>
+    </aside>
 
-        <?php if (isset($error_message)): ?>
-            <div class="alert alert-error">
-                ❌ <?php echo htmlspecialchars($error_message); ?>
+    <div class="layout">
+        <main class="main-content">
+            <div class="page-title">
+                <h1>Administrateurs des clubs</h1>
+                <p>Gérez les organisateurs de clubs</p>
             </div>
-        <?php endif; ?>
 
-        <div class="table-container">
+            <?php if (isset($success_message)): ?>
+                <div class="alert-modern alert-success-modern">
+                    <div class="alert-icon-modern">✅</div>
+                    <div class="alert-content-modern">
+                        <div class="alert-title-modern">Succès</div>
+                        <div class="alert-message-modern"><?php echo htmlspecialchars($success_message); ?></div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($error_message)): ?>
+                <div class="alert-modern alert-error-modern">
+                    <div class="alert-icon-modern">❌</div>
+                    <div class="alert-content-modern">
+                        <div class="alert-title-modern">Erreur</div>
+                        <div class="alert-message-modern"><?php echo htmlspecialchars($error_message); ?></div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <?php if (empty($admins)): ?>
-                <div class="no-admins">
-                    <div class="no-admins-icon">👥</div>
+                <div class="empty-state-modern">
+                    <div class="empty-state-icon-modern">👥</div>
                     <h3>Aucun administrateur trouvé</h3>
                     <p>Commencez par créer votre premier administrateur de club.</p>
                     <a href="creer_admin_club.php" class="btn btn-primary" style="margin-top: 20px;">
-                        ➕ Créer un administrateur
+                        <span class="btn-icon">➕</span>
+                        Créer un administrateur
                     </a>
                 </div>
             <?php else: ?>
-                <div class="table-header">
-                    <h2>Liste des administrateurs</h2>
-                    <span class="badge success"><?php echo count($admins); ?> administrateur(s)</span>
-                </div>
-                
-                <table>
+                <div class="form-section-modern">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg);">
+                        <h3>Liste des administrateurs</h3>
+                        <a href="creer_admin_club.php" class="btn btn-primary">
+                            <span class="btn-icon">➕</span>
+                            Créer un administrateur
+                        </a>
+                    </div>
+                    <div class="table-modern">
+                        <div class="table-header-modern">
+                            <div class="table-title-modern"><?php echo count($admins); ?> administrateur(s)</div>
+                        </div>
+                        <div class="table-content-modern">
+                            <table>
                     <thead>
                         <tr>
                             <th>Administrateur</th>
                             <th>Email</th>
                             <th>Clubs gérés</th>
                             <th>Date d'inscription</th>
-                            <th>Statut</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -370,60 +223,60 @@ try {
                         <?php foreach ($admins as $admin): ?>
                             <tr>
                                 <td>
-                                    <div class="admin-info">
-                                        <div class="admin-avatar">
+                                    <div class="flex items-center gap-md">
+                                        <div class="user-avatar-modern">
                                             <?php echo strtoupper(substr($admin['Prenom'], 0, 1) . substr($admin['Nom'], 0, 1)); ?>
                                         </div>
-                                        <div class="admin-details">
-                                            <h4><?php echo htmlspecialchars($admin['Prenom'] . ' ' . $admin['Nom']); ?></h4>
-                                            <p>ID: <?php echo $admin['IdUtilisateur']; ?></p>
+                                        <div>
+                                            <div class="font-semibold text-base">
+                                                <?php echo htmlspecialchars($admin['Prenom'] . ' ' . $admin['Nom']); ?>
+                                            </div>
+                                            <div class="text-sm" style="color: var(--neutral-500);">
+                                                ID: <?php echo $admin['IdUtilisateur']; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td><?php echo htmlspecialchars($admin['Email']); ?></td>
                                 <td>
-                                    <div class="clubs-list">
-                                        <?php if ($admin['nb_clubs_geres'] > 0): ?>
+                                    <?php if ($admin['nb_clubs_geres'] > 0): ?>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                                             <?php 
                                             $clubs = explode(', ', $admin['clubs_geres']);
                                             foreach ($clubs as $club): 
                                             ?>
-                                                <span class="club-item"><?php echo htmlspecialchars($club); ?></span>
+                                                <span class="badge badge-info"><?php echo htmlspecialchars($club); ?></span>
                                             <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <span class="badge warning">Aucun club</span>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                                <td><?php echo date('d/m/Y', strtotime($admin['DateInscription'])); ?></td>
-                                <!--
-                                <td>
-                                    <?php if ($admin['Status'] == 'actif'): ?>
-                                        <span class="badge success">Actif</span>
+                                        </div>
                                     <?php else: ?>
-                                        <span class="badge danger">Inactif</span>
+                                        <span class="badge badge-warning">Aucun club</span>
                                     <?php endif; ?>
                                 </td>
-                                -->
+                                <td><?php echo date('d/m/Y', strtotime($admin['DateInscription'])); ?></td>
                                 <td>
-                                    <button class="btn-icon btn-view" title="Voir le profil">
-                                        👁️
-                                    </button>
-                                    <button class="btn-icon btn-edit" title="Modifier">
-                                        ✏️
-                                    </button>
-                                    <button class="btn-icon btn-delete" 
-                                            title="Supprimer" 
-                                            onclick="confirmDelete(<?php echo $admin['IdUtilisateur']; ?>, '<?php echo htmlspecialchars($admin['Prenom'] . ' ' . $admin['Nom']); ?>')">
-                                        🗑️
-                                    </button>
+                                    <div class="flex gap-sm">
+                                        <button class="btn btn-primary btn-sm" title="Voir le profil">
+                                            👁️
+                                        </button>
+                                        <button class="btn btn-secondary btn-sm" title="Modifier">
+                                            ✏️
+                                        </button>
+                                        <button class="btn btn-ghost btn-sm" 
+                                                title="Supprimer" 
+                                                onclick="confirmDelete(<?php echo $admin['IdUtilisateur']; ?>, '<?php echo htmlspecialchars($admin['Prenom'] . ' ' . $admin['Nom']); ?>')">
+                                            🗑️
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
-                </table>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             <?php endif; ?>
-        </div>
+        </main>
     </div>
 
     <!-- Formulaire de suppression caché -->
@@ -440,5 +293,6 @@ try {
             }
         }
     </script>
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>

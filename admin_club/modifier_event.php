@@ -105,126 +105,233 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $event) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier l'événement</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .alert { padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .price-fields { display: none; margin-top: 10px; }
-        .price-fields.show { display: block; }
-        .price-input { display: inline-block; width: 30%; margin-right: 10px; }
-    </style>
+    <title>Modifier l'événement - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>Modifier l'événement</h1>
-        
-        <?php if ($error): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
-        
-        <?php if ($success): ?>
-            <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
-        <?php endif; ?>
-
-        <?php if ($event): ?>
-            <form method="POST">
-                <div class="form-group">
-                    <label for="nom_evenement">Nom de l'événement *</label>
-                    <input type="text" id="nom_evenement" name="nom_evenement" 
-                           value="<?php echo htmlspecialchars($event['NomEvenement']); ?>" required>
+    <header class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">Event Manager</a>
+            <div class="header-right">
+                <div class="club-info">
+                    <span class="club-badge"></span>
+                    <span><?php echo htmlspecialchars($event['NomClub'] ?? 'Mon Club'); ?></span>
                 </div>
-
-                <div class="form-group">
-                    <label for="type">Type d'événement *</label>
-                    <input type="text" id="type" name="type" 
-                           value="<?php echo htmlspecialchars($event['TypeEvenement']); ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="lieu">Lieu *</label>
-                    <input type="text" id="lieu" name="lieu" 
-                           value="<?php echo htmlspecialchars($event['Lieu']); ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="date">Date *</label>
-                    <input type="date" id="date" name="date" 
-                           value="<?php echo $event['Date']; ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="heure_debut">Heure de début *</label>
-                    <input type="time" id="heure_debut" name="heure_debut" 
-                           value="<?php echo substr($event['HeureDebut'], 0, 5); ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="heure_fin">Heure de fin *</label>
-                    <input type="time" id="heure_fin" name="heure_fin" 
-                           value="<?php echo substr($event['HeureFin'], 0, 5); ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="participant">Type de participant *</label>
-                    <select id="participant" name="participant" required onchange="togglePriceFields()">
-                        <option value="Tous" <?php echo $event['TypeParticipant'] == 'Tous' ? 'selected' : ''; ?>>Tous</option>
-                        <option value="Adhérents" <?php echo $event['TypeParticipant'] == 'Adhérents' ? 'selected' : ''; ?>>Adhérents uniquement</option>
-                        <option value="Membres uniquement" <?php echo $event['TypeParticipant'] == 'Membres uniquement' ? 'selected' : ''; ?>>Membres uniquement</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="capacite_max">Capacité maximale</label>
-                    <input type="number" id="capacite_max" name="capacite_max" 
-                           value="<?php echo $event['CapaciteMax']; ?>" min="1">
-                </div>
-
-                <div class="form-group">
-                    <label>Prix selon le type de participant</label>
-                    <div class="price-fields" id="price-fields">
-                        <div class="price-input">
-                            <label for="prix_adherent">Prix adhérent (€)</label>
-                            <input type="number" step="0.01" min="0" id="prix_adherent" name="prix_adherent" 
-                                   value="<?php echo $event['PrixAdherent']; ?>">
-                        </div>
-                        <div class="price-input">
-                            <label for="prix_non_adherent">Prix non-adhérent (€)</label>
-                            <input type="number" step="0.01" min="0" id="prix_non_adherent" name="prix_non_adherent" 
-                                   value="<?php echo $event['PrixNonAdherent']; ?>">
-                        </div>
-                        <div class="price-input">
-                            <label for="prix_externe">Prix externe (€)</label>
-                            <input type="number" step="0.01" min="0" id="prix_externe" name="prix_externe" 
-                                   value="<?php echo $event['PrixExterne']; ?>">
-                        </div>
+                <div class="user-section">
+                    <div class="user-info">
+                        <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                        <div class="user-role">Administrateur du club</div>
                     </div>
+                    <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
+                    <div class="user-avatar-modern"><?php echo $initials; ?></div>
+                    <button class="btn btn-ghost btn-sm" onclick="window.location.href='../auth/logout.php'">Déconnexion</button>
                 </div>
+            </div>
+        </div>
+    </header>
 
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4"><?php echo htmlspecialchars($event['description']); ?></textarea>
-                </div>
+    <div class="container">
+        <div class="layout">
+            <aside class="sidebar-modern">
+                <nav class="sidebar-nav-modern">
+                    <div class="sidebar-section-modern">
+                        <div class="sidebar-title-modern">Gestion</div>
+                        <ul class="sidebar-nav-modern">
+                            <li class="sidebar-nav-item-modern">
+                                <a href="dashboard.php" class="sidebar-nav-link-modern">
+                                    <div class="sidebar-nav-icon-modern">📊</div>
+                                    Tableau de bord
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item-modern">
+                                <a href="creer_event.php" class="sidebar-nav-link-modern">
+                                    <div class="sidebar-nav-icon-modern">➕</div>
+                                    Créer un événement
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item-modern">
+                                <a href="gerer_event.php" class="sidebar-nav-link-modern active">
+                                    <div class="sidebar-nav-icon-modern">📅</div>
+                                    Gérer les événements
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item-modern">
+                                <a href="membres.php" class="sidebar-nav-link-modern">
+                                    <div class="sidebar-nav-icon-modern">👥</div>
+                                    Membres
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item-modern">
+                                <a href="recap_evenements.php" class="sidebar-nav-link-modern">
+                                    <div class="sidebar-nav-icon-modern">📈</div>
+                                    Récapitulatif
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Modifier l'événement</button>
-                    <a href="dashboard.php" class="btn btn-secondary">Annuler</a>
+                    <div class="sidebar-section-modern">
+                        <div class="sidebar-title-modern">Personnel</div>
+                        <ul class="sidebar-nav-modern">
+                            <li class="sidebar-nav-item-modern">
+                                <a href="../utilisateur/mes_inscriptions.php" class="sidebar-nav-link-modern">
+                                    <div class="sidebar-nav-icon-modern">📋</div>
+                                    Mes inscriptions
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item-modern">
+                                <a href="../utilisateur/parametres.php" class="sidebar-nav-link-modern">
+                                    <div class="sidebar-nav-icon-modern">⚙️</div>
+                                    Paramètres
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div class="page-title">
+                    <h1>Modifier l'événement</h1>
+                    <p>Modifiez les informations de votre événement</p>
                 </div>
-            </form>
-        <?php else: ?>
-            <p>Événement introuvable.</p>
-            <a href="dashboard.php" class="btn btn-secondary">Retour au dashboard</a>
-        <?php endif; ?>
+                
+                <?php if ($error): ?>
+                    <div class="alert-modern alert-error-modern">
+                        <?php echo htmlspecialchars($error); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($success): ?>
+                    <div class="alert-modern alert-success-modern">
+                        <?php echo htmlspecialchars($success); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($event): ?>
+                    <form method="POST" class="form-modern">
+                        <!-- Section Informations générales -->
+                        <div class="form-section-modern">
+                            <h3 class="form-section-title-modern">Informations générales</h3>
+                            
+                            <div class="form-group-modern">
+                                <label for="nom_evenement" class="form-label-modern">Nom de l'événement *</label>
+                                <input type="text" id="nom_evenement" name="nom_evenement" class="form-input-modern"
+                                       value="<?php echo htmlspecialchars($event['NomEvenement']); ?>" required>
+                            </div>
+
+                            <div class="form-row-modern">
+                                <div class="form-group-modern">
+                                    <label for="type" class="form-label-modern">Type d'événement *</label>
+                                    <input type="text" id="type" name="type" class="form-input-modern"
+                                           value="<?php echo htmlspecialchars($event['TypeEvenement']); ?>" required>
+                                </div>
+
+                                <div class="form-group-modern">
+                                    <label for="lieu" class="form-label-modern">Lieu *</label>
+                                    <input type="text" id="lieu" name="lieu" class="form-input-modern"
+                                           value="<?php echo htmlspecialchars($event['Lieu']); ?>" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section Date et heure -->
+                        <div class="form-section-modern">
+                            <h3 class="form-section-title-modern">Date et heure</h3>
+                            
+                            <div class="form-group-modern">
+                                <label for="date" class="form-label-modern">Date *</label>
+                                <input type="date" id="date" name="date" class="form-input-modern"
+                                       value="<?php echo $event['Date']; ?>" required>
+                            </div>
+
+                            <div class="form-row-modern">
+                                <div class="form-group-modern">
+                                    <label for="heure_debut" class="form-label-modern">Heure de début *</label>
+                                    <input type="time" id="heure_debut" name="heure_debut" class="form-input-modern"
+                                           value="<?php echo substr($event['HeureDebut'], 0, 5); ?>" required>
+                                </div>
+
+                                <div class="form-group-modern">
+                                    <label for="heure_fin" class="form-label-modern">Heure de fin *</label>
+                                    <input type="time" id="heure_fin" name="heure_fin" class="form-input-modern"
+                                           value="<?php echo substr($event['HeureFin'], 0, 5); ?>" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section Participants et prix -->
+                        <div class="form-section-modern">
+                            <h3 class="form-section-title-modern">Participants et prix</h3>
+                            
+                            <div class="form-group-modern">
+                                <label for="participant" class="form-label-modern">Type de participant *</label>
+                                <select id="participant" name="participant" class="form-input-modern form-select-modern" required onchange="togglePriceFields()">
+                                    <option value="Tous" <?php echo $event['TypeParticipant'] == 'Tous' ? 'selected' : ''; ?>>Tous</option>
+                                    <option value="Adhérents" <?php echo $event['TypeParticipant'] == 'Adhérents' ? 'selected' : ''; ?>>Adhérents uniquement</option>
+                                    <option value="Membres uniquement" <?php echo $event['TypeParticipant'] == 'Membres uniquement' ? 'selected' : ''; ?>>Membres uniquement</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group-modern">
+                                <label for="capacite_max" class="form-label-modern">Capacité maximale</label>
+                                <input type="number" id="capacite_max" name="capacite_max" class="form-input-modern"
+                                       value="<?php echo $event['CapaciteMax']; ?>" min="1">
+                            </div>
+
+                            <div class="admin-section-modern" id="price-fields">
+                                <h4 style="margin-bottom: var(--space-lg); color: var(--neutral-700);">Prix selon le type de participant</h4>
+                                
+                                <div class="form-row-modern">
+                                    <div class="form-group-modern">
+                                        <label for="prix_adherent" class="form-label-modern">Prix adhérent (€)</label>
+                                        <input type="number" step="0.01" min="0" id="prix_adherent" name="prix_adherent" class="form-input-modern"
+                                               value="<?php echo $event['PrixAdherent']; ?>">
+                                    </div>
+                                    <div class="form-group-modern">
+                                        <label for="prix_non_adherent" class="form-label-modern">Prix non-adhérent (€)</label>
+                                        <input type="number" step="0.01" min="0" id="prix_non_adherent" name="prix_non_adherent" class="form-input-modern"
+                                               value="<?php echo $event['PrixNonAdherent']; ?>">
+                                    </div>
+                                    <div class="form-group-modern">
+                                        <label for="prix_externe" class="form-label-modern">Prix externe (€)</label>
+                                        <input type="number" step="0.01" min="0" id="prix_externe" name="prix_externe" class="form-input-modern"
+                                               value="<?php echo $event['PrixExterne']; ?>">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section Description -->
+                        <div class="form-section-modern">
+                            <h3 class="form-section-title-modern">Description</h3>
+                            
+                            <div class="form-group-modern">
+                                <label for="description" class="form-label-modern">Description de l'événement</label>
+                                <textarea id="description" name="description" class="form-input-modern form-textarea-modern" rows="4"><?php echo htmlspecialchars($event['description']); ?></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions-modern">
+                            <button type="submit" class="btn btn-primary btn-lg">Modifier l'événement</button>
+                            <a href="dashboard.php" class="btn btn-outline btn-lg">Annuler</a>
+                        </div>
+                    </form>
+                <?php else: ?>
+                    <div class="empty-state-modern">
+                        <div class="empty-state-icon-modern">❌</div>
+                        <h3>Événement introuvable</h3>
+                        <p>L'événement que vous cherchez n'existe pas ou vous n'avez pas les droits pour le modifier.</p>
+                        <a href="dashboard.php" class="btn btn-primary">Retour au dashboard</a>
+                    </div>
+                <?php endif; ?>
+            </main>
+        </div>
     </div>
 
+    <script src="../assets/js/main.js"></script>
     <script>
         function togglePriceFields() {
             const participant = document.getElementById('participant').value;
@@ -234,27 +341,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $event) {
             const prixExterne = document.getElementById('prix_externe');
 
             if (participant === 'Adhérents') {
-                priceFields.classList.add('show');
-                prixAdherent.style.display = 'block';
-                prixNonAdherent.style.display = 'none';
-                prixExterne.style.display = 'none';
+                priceFields.style.display = 'block';
+                prixAdherent.parentElement.style.display = 'block';
+                prixNonAdherent.parentElement.style.display = 'none';
+                prixExterne.parentElement.style.display = 'none';
             } else if (participant === 'Membres uniquement') {
-                priceFields.classList.add('show');
-                prixAdherent.style.display = 'block';
-                prixNonAdherent.style.display = 'block';
-                prixExterne.style.display = 'none';
+                priceFields.style.display = 'block';
+                prixAdherent.parentElement.style.display = 'block';
+                prixNonAdherent.parentElement.style.display = 'block';
+                prixExterne.parentElement.style.display = 'none';
             } else if (participant === 'Tous') {
-                priceFields.classList.add('show');
-                prixAdherent.style.display = 'block';
-                prixNonAdherent.style.display = 'block';
-                prixExterne.style.display = 'block';
+                priceFields.style.display = 'block';
+                prixAdherent.parentElement.style.display = 'block';
+                prixNonAdherent.parentElement.style.display = 'block';
+                prixExterne.parentElement.style.display = 'block';
             } else {
-                priceFields.classList.remove('show');
+                priceFields.style.display = 'none';
             }
         }
 
         // Initialiser l'affichage des prix
-        togglePriceFields();
+        document.addEventListener('DOMContentLoaded', function() {
+            togglePriceFields();
+        });
     </script>
 </body>
 </html>

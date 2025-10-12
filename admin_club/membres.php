@@ -23,8 +23,10 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Participants - Hackathon 2025</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <title>Membres du Club - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', sans-serif; }
         .navbar {

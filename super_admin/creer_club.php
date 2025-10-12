@@ -58,15 +58,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Récupération des données
     $nom_club = trim($_POST['nom_club'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $id_admin_club = trim($_POST['admin_existant'] ?? '');
     $logo_existant = $_POST['logo_existant'] ?? '';
     
-    // Données pour nouvel organisateur
+    // Gestion du choix d'administrateur
+    $admin_choice = $_POST['admin_choice'] ?? 'existing';
+    $creer_nouvel_organisateur = ($admin_choice === 'new');
+    
+    if ($creer_nouvel_organisateur) {
+        // Données pour nouvel administrateur
     $organisateur_email = trim($_POST['organisateur_email'] ?? '');
     $organisateur_nom = trim($_POST['organisateur_nom'] ?? '');
     $organisateur_prenom = trim($_POST['organisateur_prenom'] ?? '');
     $organisateur_telephone = trim($_POST['organisateur_telephone'] ?? '');
-    $creer_nouvel_organisateur = isset($_POST['creer_nouvel_organisateur']);
+        $id_admin_club = '';
+    } else {
+        // Administrateur existant
+        $id_admin_club = trim($_POST['id_admin_club'] ?? '');
+        $organisateur_email = $organisateur_nom = $organisateur_prenom = $organisateur_telephone = '';
+    }
     
     // Si en mode édition, récupérer l'ID du club
     if ($edition_mode) {
@@ -137,8 +146,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $errors['general'] = "Erreur lors de la vérification de l'email.";
             }
         }
-    } elseif (!empty($id_admin_club)) {
+    } else {
         // Validation de l'administrateur existant
+        if (empty($id_admin_club)) {
+            $errors['id_admin_club'] = "Veuillez sélectionner un administrateur.";
+        } else {
         try {
             $sql_check_admin = "SELECT IdUtilisateur, Role FROM Utilisateur WHERE IdUtilisateur = :id_admin";
             $stmt_check_admin = $conn->prepare($sql_check_admin);
@@ -147,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $admin_data = $stmt_check_admin->fetch(PDO::FETCH_ASSOC);
             
             if (!$admin_data) {
-                $errors['admin_existant'] = "L'administrateur sélectionné n'existe pas.";
+                    $errors['id_admin_club'] = "L'administrateur sélectionné n'existe pas.";
             } else {
                 // Changer le rôle en organisateur si ce n'est pas déjà le cas
                 if ($admin_data['Role'] !== 'organisateur') {
@@ -163,6 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         } catch (PDOException $e) {
             $errors['general'] = "Erreur lors de la vérification de l'administrateur.";
+            }
         }
     }
     
@@ -389,230 +402,127 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $edition_mode ? 'Modifier le Club' : 'Créer un Club'; ?></title>
-    <link rel="stylesheet" href="../frontend/css.css">
-    <style>
-        /* Votre CSS existant reste inchangé */
-        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar {
-            background: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .navbar-brand {
-            font-size: 1.5em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .page-header {
-            margin-bottom: 30px;
-        }
-        .page-header h1 {
-            font-size: 2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .page-header p {
-            color: #666;
-        }
-        .form-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        .form-section h3 {
-            color: #667eea;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
-        }
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        .file-upload {
-            border: 2px dashed #e0e0e0;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .file-upload:hover {
-            border-color: #667eea;
-            background: #f9f9ff;
-        }
-        .file-upload input[type="file"] {
-            display: none;
-        }
-        .file-upload-icon {
-            font-size: 3em;
-            margin-bottom: 10px;
-        }
-        .image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            margin: 15px auto;
-            border-radius: 10px;
-            display: none;
-        }
-        .logo-existant {
-            max-width: 200px;
-            max-height: 200px;
-            margin: 15px auto;
-            border-radius: 10px;
-            border: 3px solid #bdc3c7;
-        }
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-        }
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
-        .btn-warning {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-            color: white;
-        }
-        .btn-warning:hover {
-            transform: translateY(-2px);
-        }
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #555;
-        }
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-        .info-box strong {
-            color: #1565c0;
-        }
-        .char-counter {
-            text-align: right;
-            font-size: 0.85em;
-            color: #999;
-            margin-top: 5px;
-        }
-        .error {
-            color: #f44336;
-            font-size: 0.9em;
-            margin-top: 5px;
-            display: block;
-        }
-    </style>
+    <title><?php echo $edition_mode ? 'Modifier le Club' : 'Créer un Club'; ?> - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">🎓 GestionEvents</div>
-        <a href="dashboard.php" class="btn btn-secondary">Retour au dashboard</a>
+    <nav class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">🎓 Event Manager</a>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Super Administrateur</div>
+                </div>
+                <div class="user-avatar-modern"><?php echo strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSION['nom'], 0, 1)); ?></div>
+                <a href="../auth/logout.php" class="btn btn-ghost btn-sm">Déconnexion</a>
+            </div>
+        </div>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <h1><?php echo $edition_mode ? '✏️ Modifier le club' : '🏢 Créer un nouveau club'; ?></h1>
-            <p><?php echo $edition_mode ? 'Modifiez les informations du club' : 'Remplissez les informations du club'; ?></p>
+    <aside class="sidebar-modern">
+        <nav class="sidebar-nav-modern">
+            <div class="sidebar-section-modern">
+                <div class="sidebar-title-modern">Administration</div>
+                <ul class="sidebar-nav-modern">
+                    <li class="sidebar-nav-item-modern">
+                        <a href="dashboard.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📊</div>
+                            Tableau de bord
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="gerer_clubs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">🏛️</div>
+                            Gérer les clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="liste_admins.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">👥</div>
+                            Admins des clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="evenements.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📅</div>
+                            Les événements
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="utilisateurs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">👤</div>
+                            Les utilisateurs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="emails.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📧</div>
+                            Envoyer un email
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="validations.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">✅</div>
+                            Validations
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <div class="layout">
+        <main class="main-content">
+            <div class="page-title">
+                <h1><?php echo $edition_mode ? 'Modifier le Club' : 'Créer un Club'; ?></h1>
+                <p><?php echo $edition_mode ? 'Modifiez les informations du club' : 'Ajoutez un nouveau club à la plateforme'; ?></p>
         </div>
 
         <?php if (!empty($errors['general'])): ?>
-            <div class="error" style="background: #ffebee; border: 1px solid #f44336; color: #c62828; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <div class="alert-modern alert-error-modern">
                 <?php echo htmlspecialchars($errors['general']); ?>
             </div>
         <?php endif; ?>
 
-        <form method="POST" enctype="multipart/form-data" id="clubForm">
+            <form method="POST" enctype="multipart/form-data" id="clubForm" class="form-modern">
             <?php if ($edition_mode && $club_id): ?>
                 <input type="hidden" name="club_id" value="<?php echo $club_id; ?>">
                 <input type="hidden" name="logo_existant" value="<?php echo htmlspecialchars($logo_existant); ?>">
             <?php endif; ?>
 
-            <div class="form-section">
-                <h3>📝 Informations générales</h3>
+                <div class="form-section-modern">
+                    <div class="form-section-title-modern">📝 Informations générales</div>
                 
-                <div class="form-group">
-                    <label for="nom_club">Nom du club *</label>
+                    <div class="form-group-modern">
+                        <label for="nom_club" class="form-label-modern">Nom du club *</label>
                     <input type="text" 
                            id="nom_club" 
                            name="nom_club" 
+                               class="form-input-modern"
                            placeholder="Ex: Club Informatique" 
                            required
                            maxlength="150"
                            value="<?php echo htmlspecialchars($nom_club); ?>">
                     <?php if (isset($errors['nom_club'])): ?>
-                        <span class="error"><?php echo htmlspecialchars($errors['nom_club']); ?></span>
+                            <div class="error-modern"><?php echo htmlspecialchars($errors['nom_club']); ?></div>
                     <?php endif; ?>
                     <div class="char-counter">
                         <span id="nom-counter"><?php echo strlen($nom_club); ?></span>/150
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="description">Description du club</label>
+                    <div class="form-group-modern">
+                        <label for="description" class="form-label-modern">Description du club</label>
                     <textarea id="description" 
                               name="description" 
+                                  class="form-input-modern form-textarea-modern"
                               placeholder="Décrivez les objectifs et activités du club..."
                               maxlength="1000"><?php echo htmlspecialchars($description); ?></textarea>
                     <?php if (isset($errors['description'])): ?>
-                        <span class="error"><?php echo htmlspecialchars($errors['description']); ?></span>
+                            <div class="error-modern"><?php echo htmlspecialchars($errors['description']); ?></div>
                     <?php endif; ?>
                     <div class="char-counter">
                         <span id="desc-counter"><?php echo strlen($description); ?></span>/1000
@@ -620,24 +530,27 @@ try {
                 </div>
             </div>
 
-            <div class="form-section">
-                <h3>🎨 Logo du club</h3>
+                <div class="form-section-modern">
+                    <div class="form-section-title-modern">🎨 Logo du club</div>
                 
-                <div class="form-group">
+                    <div class="form-group-modern">
                     <?php if (!empty($logo_existant)): ?>
-                        <div style="text-align: center; margin-bottom: 15px;">
+                            <div class="logo-preview-modern">
                             <p><strong>Logo actuel :</strong></p>
                             <img src="../uploads/clubs/<?php echo htmlspecialchars($logo_existant); ?>" 
-                                 class="logo-existant" 
-                                 alt="Logo actuel">
+                                     alt="Logo actuel" style="max-width: 200px; max-height: 200px; border-radius: var(--border-radius-md);">
                         </div>
                     <?php endif; ?>
                     
                     <label class="file-upload" for="logo">
+                            <div class="file-upload-content">
                         <div class="file-upload-icon">📷</div>
-                        <div><strong>Cliquez pour <?php echo $edition_mode ? 'changer le logo' : 'télécharger un logo'; ?></strong></div>
-                        <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                                <div class="file-upload-text">
+                                    <strong>Cliquez pour <?php echo $edition_mode ? 'changer le logo' : 'télécharger un logo'; ?></strong>
+                                </div>
+                                <div class="file-upload-hint">
                             PNG, JPG ou GIF (max 2MB)
+                                </div>
                         </div>
                         <input type="file" 
                                id="logo" 
@@ -645,193 +558,166 @@ try {
                                accept="image/*">
                     </label>
                     <?php if (isset($errors['logo'])): ?>
-                        <span class="error"><?php echo htmlspecialchars($errors['logo']); ?></span>
+                            <div class="error-modern"><?php echo htmlspecialchars($errors['logo']); ?></div>
                     <?php endif; ?>
-                    <img id="logo-preview" class="image-preview" alt="Aperçu du logo">
-                </div>
+                        <div class="image-preview" id="imagePreview"></div>
             </div>
-
-            <div class="form-section">
-                <h3>👤 Organisateur du club</h3>
-                
-                <div class="info-box">
-                    <strong>ℹ️ Information :</strong> Vous pouvez choisir un utilisateur existant (qui deviendra organisateur) ou créer un nouveau compte organisateur.
                 </div>
 
-                <div class="form-group" style="margin-top: 20px;">
-                    <label>
-                        <input type="radio" name="choix_organisateur" value="existant" id="choix_existant" 
-                               <?php echo empty($creer_nouvel_organisateur) ? 'checked' : ''; ?>>
-                        Choisir un utilisateur existant
+                <div class="form-section-modern">
+                    <div class="form-section-title-modern">👤 Administrateur du club</div>
+                    
+                    <div class="form-group-modern">
+                        <div class="radio-group-modern">
+                            <label class="radio-option-modern">
+                                <input type="radio" name="admin_choice" value="existing" <?php echo !$creer_nouvel_organisateur ? 'checked' : ''; ?>>
+                                <span class="radio-label-modern">Utiliser un administrateur existant</span>
+                            </label>
+                            <label class="radio-option-modern">
+                                <input type="radio" name="admin_choice" value="new" <?php echo $creer_nouvel_organisateur ? 'checked' : ''; ?>>
+                                <span class="radio-label-modern">Créer un nouvel administrateur</span>
                     </label>
+                        </div>
                 </div>
 
-                <div id="section_utilisateur_existant" class="form-group">
-                    <label for="admin_existant">Sélectionner un utilisateur</label>
-                    <select id="admin_existant" name="admin_existant">
-                        <option value="">-- Choisir un utilisateur --</option>
+                    <div id="existing-admin" class="form-group-modern" style="<?php echo $creer_nouvel_organisateur ? 'display: none;' : ''; ?>">
+                        <label for="id_admin_club" class="form-label-modern">Sélectionner un administrateur</label>
+                        <select id="id_admin_club" name="id_admin_club" class="form-input-modern form-select-modern">
+                            <option value="">-- Choisir un administrateur --</option>
                         <?php foreach ($utilisateurs as $user): ?>
                             <option value="<?php echo $user['IdUtilisateur']; ?>" 
-                                <?php echo ($id_admin_club == $user['IdUtilisateur']) ? 'selected' : ''; ?>>
+                                        <?php echo $id_admin_club == $user['IdUtilisateur'] ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($user['Prenom'] . ' ' . $user['Nom'] . ' (' . $user['Email'] . ') - ' . ucfirst($user['Role'])); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <?php if (isset($errors['admin_existant'])): ?>
-                        <span class="error"><?php echo htmlspecialchars($errors['admin_existant']); ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="radio" name="choix_organisateur" value="nouveau" id="choix_nouveau" 
-                               <?php echo $creer_nouvel_organisateur ? 'checked' : ''; ?>>
-                        Créer un nouvel organisateur
-                    </label>
-                </div>
-
-                <div id="section_nouvel_organisateur" class="form-group" style="display: none;">
-                    <div class="form-group">
-                        <label for="organisateur_email">Email de l'organisateur *</label>
-                        <input type="email" 
-                               id="organisateur_email" 
-                               name="organisateur_email" 
-                               placeholder="Ex: organisateur@email.com" 
-                               value="<?php echo htmlspecialchars($organisateur_email); ?>">
-                        <?php if (isset($errors['organisateur_email'])): ?>
-                            <span class="error"><?php echo htmlspecialchars($errors['organisateur_email']); ?></span>
+                        <?php if (isset($errors['id_admin_club'])): ?>
+                            <div class="error-modern"><?php echo htmlspecialchars($errors['id_admin_club']); ?></div>
                         <?php endif; ?>
                     </div>
 
-                    <div class="form-group">
-                        <label for="organisateur_nom">Nom</label>
+                    <div id="new-admin" class="admin-section-modern" style="<?php echo !$creer_nouvel_organisateur ? 'display: none;' : ''; ?>">
+                        <div class="form-row">
+                            <div class="form-group-modern">
+                                <label for="organisateur_prenom" class="form-label-modern">Prénom *</label>
+                                <input type="text" 
+                                       id="organisateur_prenom" 
+                                       name="organisateur_prenom" 
+                                       class="form-input-modern"
+                                       placeholder="Prénom de l'administrateur"
+                                       value="<?php echo htmlspecialchars($organisateur_prenom); ?>">
+                                <?php if (isset($errors['organisateur_prenom'])): ?>
+                                    <div class="error-modern"><?php echo htmlspecialchars($errors['organisateur_prenom']); ?></div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-group-modern">
+                                <label for="organisateur_nom" class="form-label-modern">Nom *</label>
                         <input type="text" 
                                id="organisateur_nom" 
                                name="organisateur_nom" 
-                               placeholder="Ex: Dupont" 
+                                       class="form-input-modern"
+                                       placeholder="Nom de l'administrateur"
                                value="<?php echo htmlspecialchars($organisateur_nom); ?>">
                         <?php if (isset($errors['organisateur_nom'])): ?>
-                            <span class="error"><?php echo htmlspecialchars($errors['organisateur_nom']); ?></span>
+                                    <div class="error-modern"><?php echo htmlspecialchars($errors['organisateur_nom']); ?></div>
                         <?php endif; ?>
+                            </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="organisateur_prenom">Prénom</label>
-                        <input type="text" 
-                               id="organisateur_prenom" 
-                               name="organisateur_prenom" 
-                               placeholder="Ex: Jean" 
-                               value="<?php echo htmlspecialchars($organisateur_prenom); ?>">
-                        <?php if (isset($errors['organisateur_prenom'])): ?>
-                            <span class="error"><?php echo htmlspecialchars($errors['organisateur_prenom']); ?></span>
+                        <div class="form-row">
+                            <div class="form-group-modern">
+                                <label for="organisateur_email" class="form-label-modern">Email *</label>
+                                <input type="email" 
+                                       id="organisateur_email" 
+                                       name="organisateur_email" 
+                                       class="form-input-modern"
+                                       placeholder="email@exemple.com"
+                                       value="<?php echo htmlspecialchars($organisateur_email); ?>">
+                                <?php if (isset($errors['organisateur_email'])): ?>
+                                    <div class="error-modern"><?php echo htmlspecialchars($errors['organisateur_email']); ?></div>
                         <?php endif; ?>
                     </div>
-
-                    <div class="form-group">
-                        <label for="organisateur_telephone">Téléphone (optionnel)</label>
+                            <div class="form-group-modern">
+                                <label for="organisateur_telephone" class="form-label-modern">Téléphone</label>
                         <input type="tel" 
                                id="organisateur_telephone" 
                                name="organisateur_telephone" 
-                               placeholder="Ex: 0123456789" 
+                                       class="form-input-modern"
+                                       placeholder="06 12 34 56 78"
                                value="<?php echo htmlspecialchars($organisateur_telephone); ?>">
-                    </div>
-
-                    <input type="hidden" name="creer_nouvel_organisateur" id="creer_nouvel_organisateur" value="0">
+                                <?php if (isset($errors['organisateur_telephone'])): ?>
+                                    <div class="error-modern"><?php echo htmlspecialchars($errors['organisateur_telephone']); ?></div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <strong>Note :</strong> Un mot de passe temporaire sera généré et envoyé par email à l'administrateur.
+                        </div>
                 </div>
             </div>
 
-            <div class="form-actions">
-                <a href="<?php echo $edition_mode ? 'recap_club.php?id=' . $club_id : 'dashboard.php'; ?>" class="btn btn-secondary">
-                    Annuler
-                </a>
-                <button type="submit" class="btn <?php echo $edition_mode ? 'btn-warning' : 'btn-primary'; ?>">
-                    <?php echo $edition_mode ? '✓ Modifier le club' : '✓ Créer le club'; ?>
+                <div class="form-actions-modern">
+                    <a href="gerer_clubs.php" class="btn btn-ghost">Annuler</a>
+                    <button type="submit" class="btn btn-primary">
+                        <?php echo $edition_mode ? 'Modifier le club' : 'Créer le club'; ?>
                 </button>
             </div>
         </form>
+        </main>
     </div>
 
+    <script src="../assets/js/main.js"></script>
     <script>
-        // Gestion des sections organisateur
-        function toggleOrganisateurSections() {
-            const choixExistant = document.getElementById('choix_existant');
-            const choixNouveau = document.getElementById('choix_nouveau');
-            const sectionExistant = document.getElementById('section_utilisateur_existant');
-            const sectionNouveau = document.getElementById('section_nouvel_organisateur');
-            const inputCreerNouveau = document.getElementById('creer_nouvel_organisateur');
+        // Gestion de l'affichage des sections administrateur
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminChoice = document.querySelectorAll('input[name="admin_choice"]');
+            const existingAdmin = document.getElementById('existing-admin');
+            const newAdmin = document.getElementById('new-admin');
             
-            if (choixExistant.checked) {
-                sectionExistant.style.display = 'block';
-                sectionNouveau.style.display = 'none';
-                inputCreerNouveau.value = '0';
-            } else if (choixNouveau.checked) {
-                sectionExistant.style.display = 'none';
-                sectionNouveau.style.display = 'block';
-                inputCreerNouveau.value = '1';
-            }
-        }
-
-        // Événements pour les radio buttons
-        document.getElementById('choix_existant').addEventListener('change', toggleOrganisateurSections);
-        document.getElementById('choix_nouveau').addEventListener('change', toggleOrganisateurSections);
-
-        // Initialiser l'affichage
-        toggleOrganisateurSections();
-
-        // Compteur de caractères pour le nom
-        document.getElementById('nom_club').addEventListener('input', function() {
-            document.getElementById('nom-counter').textContent = this.value.length;
-        });
-
-        // Compteur de caractères pour la description
-        document.getElementById('description').addEventListener('input', function() {
-            document.getElementById('desc-counter').textContent = this.value.length;
-        });
-
-        // Preview du logo
-        document.getElementById('logo').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const preview = document.getElementById('logo-preview');
+            adminChoice.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'existing') {
+                        existingAdmin.style.display = 'block';
+                        newAdmin.style.display = 'none';
+                    } else {
+                        existingAdmin.style.display = 'none';
+                        newAdmin.style.display = 'block';
+                    }
+                });
+            });
             
-            if (file && file.type.startsWith('image/')) {
+            // Compteur de caractères
+            const nomInput = document.getElementById('nom_club');
+            const descInput = document.getElementById('description');
+            const nomCounter = document.getElementById('nom-counter');
+            const descCounter = document.getElementById('desc-counter');
+            
+            nomInput.addEventListener('input', function() {
+                nomCounter.textContent = this.value.length;
+            });
+            
+            descInput.addEventListener('input', function() {
+                descCounter.textContent = this.value.length;
+            });
+            
+            // Prévisualisation d'image
+            const logoInput = document.getElementById('logo');
+            const imagePreview = document.getElementById('imagePreview');
+            
+            logoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
+                        imagePreview.innerHTML = '<img src="' + e.target.result + '" style="max-width: 200px; max-height: 200px; border-radius: var(--border-radius-md);">';
+                        imagePreview.style.display = 'block';
                 };
-                
                 reader.readAsDataURL(file);
-            }
-        });
-
-        // Animation du label file upload
-        document.querySelector('.file-upload').addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.style.borderColor = '#667eea';
-            this.style.background = '#f9f9ff';
-        });
-
-        document.querySelector('.file-upload').addEventListener('dragleave', function() {
-            this.style.borderColor = '#e0e0e0';
-            this.style.background = 'white';
-        });
-
-        // Confirmation avant de quitter si formulaire modifié
-        let formModified = false;
-        document.getElementById('clubForm').addEventListener('input', function() {
-            formModified = true;
-        });
-
-        window.addEventListener('beforeunload', function(e) {
-            if (formModified) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
-
-        document.getElementById('clubForm').addEventListener('submit', function() {
-            formModified = false;
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>

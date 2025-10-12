@@ -33,21 +33,48 @@ $all_events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>Tous les événements - GestionEvents</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tous les événements - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <?php include '_navbar.php'; ?>
+    <header class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">Event Manager</a>
+            <nav class="nav-main">
+                <a href="dashboard.php" class="nav-link-modern">Accueil</a>
+                <a href="clubs.php" class="nav-link-modern">Clubs</a>
+                <a href="evenements.php" class="nav-link-modern active">Événements</a>
+                <a href="mes_inscriptions.php" class="nav-link-modern">Mes inscriptions</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Participant</div>
+                </div>
+                <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
+                <div class="user-avatar-modern"><?php echo $initials; ?></div>
+                <button class="btn btn-ghost btn-sm" onclick="window.location.href='../auth/logout.php'">Déconnexion</button>
+            </div>
+        </div>
+    </header>
 
-    <div style="max-width: 1200px; margin: 20px auto; padding: 0 15px;">
-        <h1>Tous les événements disponibles</h1>
+    <div class="container">
+        <div class="page-title">
+            <h1>Tous les événements disponibles</h1>
+            <p>Découvrez tous les événements auxquels vous pouvez participer</p>
+        </div>
         
-        <div style="margin-top: 20px;">
+        <div class="events-grid-modern">
             <?php 
             $event_found = false;
             foreach ($all_events as $event): 
                 $is_event_visible = false;
 
-                // 3. Logique de filtrage en PHP
+                // Logique de filtrage en PHP
                 if ($event['TypeParticipant'] == 'Tous' || $event['TypeParticipant'] == 'Tous les étudiants') {
                     $is_event_visible = true;
                 } elseif ($event['TypeParticipant'] == 'Adhérents' && in_array($event['IdClub'], $user_memberships)) {
@@ -59,41 +86,68 @@ $all_events = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 if ($is_event_visible):
                     $event_found = true;
             ?>
-                <div style="background-color: white; border: 1px solid #eee; padding: 15px; margin-bottom: 10px;">
-                    <h3><?php echo htmlspecialchars($event['NomEvenement']); ?> (Club: <?php echo htmlspecialchars($event['NomClub']); ?>)</h3>
-                     <p>
-                        <?php if ($event['TypeParticipant'] == 'Adhérents'): ?>
-                            <span style="background-color: #ffc107; color: black; padding: 3px 8px; border-radius: 10px; font-size: 0.8em;">Réservé aux adhérents</span>
-                        <?php elseif ($event['TypeParticipant'] == 'Tous les étudiants'): ?>
-                            <span style="background-color: #cfe2ff; color: #055160; padding: 3px 8px; border-radius: 10px; font-size: 0.8em;">Ouvert à tous les étudiants</span>
-                        <?php else: ?>
-                            <span style="background-color: #cfe2ff; color: #055160; padding: 3px 8px; border-radius: 10px; font-size: 0.8em;">Ouvert à tous</span>
-                        <?php endif; ?>
-                    </p>
-                    
-                    <!-- Affichage des prix selon le type d'utilisateur -->
-                    <div style="margin: 10px 0; font-size: 0.9em;">
-                        <?php 
-                        $is_member = in_array($event['IdClub'], $user_memberships);
-                        if ($is_member): 
-                            // Utilisateur est membre du club
-                            $price = $event['PrixAdherent'];
-                            $user_type = "Adhérent";
-                        else:
-                            // Utilisateur n'est pas membre du club
-                            $price = $event['PrixNonAdherent'];
-                            $user_type = "Non-adhérent";
-                        endif;
-                        ?>
-                        <strong>Prix (<?php echo $user_type; ?>):</strong>
-                        <?php if ($price == 0 || $price === null): ?>
-                            <span style="color: #28a745; font-weight: bold;">Gratuit</span>
-                        <?php else: ?>
-                            <span style="color: #007bff; font-weight: bold;"><?php echo number_format(floatval($price), 2); ?> €</span>
-                        <?php endif; ?>
+                <div class="event-card-modern">
+                    <div class="event-image-modern">
+                        <div class="event-date-badge-modern">
+                            <?php echo date('d M Y', strtotime($event['Date'])); ?>
+                        </div>
                     </div>
                     
-                    <a href="inscription_evenement.php?id=<?php echo (int)$event['IdEvenement']; ?>">Voir détails</a>
+                    <div class="event-content-modern">
+                        <div class="event-title-modern"><?php echo htmlspecialchars($event['NomEvenement']); ?></div>
+                        
+                        <div class="event-meta-modern">
+                            <div class="event-meta-item-modern">
+                                <div class="event-meta-icon-modern">🏛️</div>
+                                <span><?php echo htmlspecialchars($event['NomClub']); ?></span>
+                            </div>
+                            <div class="event-meta-item-modern">
+                                <div class="event-meta-icon-modern">🕒</div>
+                                <span><?php echo date('H:i', strtotime($event['HeureDebut'])); ?></span>
+                            </div>
+                            <div class="event-meta-item-modern">
+                                <div class="event-meta-icon-modern">📍</div>
+                                <span><?php echo htmlspecialchars($event['Lieu'] ?? 'Lieu à confirmer'); ?></span>
+                            </div>
+                        </div>
+                        
+                        <div class="event-type-modern">
+                            <?php if ($event['TypeParticipant'] == 'Adhérents'): ?>
+                                <div class="badge badge-warning">Réservé aux adhérents</div>
+                            <?php elseif ($event['TypeParticipant'] == 'Tous les étudiants'): ?>
+                                <div class="badge badge-info">Ouvert à tous les étudiants</div>
+                            <?php else: ?>
+                                <div class="badge badge-info">Ouvert à tous</div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="event-price-modern">
+                            <?php 
+                            $is_member = in_array($event['IdClub'], $user_memberships);
+                            if ($is_member): 
+                                // Utilisateur est membre du club
+                                $price = $event['PrixAdherent'];
+                                $user_type = "Adhérent";
+                            else:
+                                // Utilisateur n'est pas membre du club
+                                $price = $event['PrixNonAdherent'];
+                                $user_type = "Non-adhérent";
+                            endif;
+                            ?>
+                            <div class="price-modern">
+                                <?php if ($price == 0 || $price === null): ?>
+                                    <span class="price-free-modern">Gratuit</span>
+                                <?php else: ?>
+                                    <?php echo number_format(floatval($price), 2); ?> €
+                                <?php endif; ?>
+                            </div>
+                            <div class="badge badge-info"><?php echo $user_type; ?></div>
+                        </div>
+                        
+                        <div class="event-actions-modern">
+                            <a href="inscription_evenement.php?id=<?php echo (int)$event['IdEvenement']; ?>" class="btn btn-primary btn-sm">Voir détails</a>
+                        </div>
+                    </div>
                 </div>
             <?php 
                 endif; // Fin de la condition d'affichage
@@ -101,9 +155,15 @@ $all_events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (!$event_found):
             ?>
-                <p>Aucun événement disponible pour vous pour le moment.</p>
+                <div class="empty-state-modern">
+                    <div class="empty-state-icon-modern">📅</div>
+                    <h3>Aucun événement disponible</h3>
+                    <p>Aucun événement disponible pour vous pour le moment.</p>
+                </div>
             <?php endif; ?>
         </div>
     </div>
+
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>

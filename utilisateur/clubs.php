@@ -35,43 +35,98 @@ if (isset($_SESSION['message'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clubs - GestionEvents</title>
-    <!-- Votre CSS sera inclus ici -->
+    <title>Clubs - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <?php include '_navbar.php'; // Inclure la barre de navigation ?>
+    <header class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">Event Manager</a>
+            <nav class="nav-main">
+                <a href="dashboard.php" class="nav-link-modern">Accueil</a>
+                <a href="clubs.php" class="nav-link-modern active">Clubs</a>
+                <a href="evenements.php" class="nav-link-modern">Événements</a>
+                <a href="mes_inscriptions.php" class="nav-link-modern">Mes inscriptions</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Participant</div>
+                </div>
+                <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
+                <div class="user-avatar-modern"><?php echo $initials; ?></div>
+                <button class="btn btn-ghost btn-sm" onclick="window.location.href='../auth/logout.php'">Déconnexion</button>
+            </div>
+        </div>
+    </header>
 
-    <div style="max-width: 1200px; margin: 20px auto; padding: 0 15px;">
-        <h1>Nos Clubs</h1>
-        <p>Découvrez tous les clubs disponibles sur la plateforme.</p>
+    <div class="container">
+        <div class="page-title">
+            <h1>Nos Clubs</h1>
+            <p>Découvrez tous les clubs disponibles sur la plateforme</p>
+        </div>
 
         <?php if ($message): ?>
-            <div class="alert alert-<?php echo $message_type; ?>" style="padding: 10px; margin-bottom: 15px; border-radius: 5px; <?php echo $message_type === 'success' ? 'background-color: #d4edda; color: #155724;' : 'background-color: #f8d7da; color: #721c24;'; ?>"><?php echo $message; ?></div>
+            <div class="alert-modern <?php echo $message_type === 'success' ? 'alert-success-modern' : 'alert-error-modern'; ?>">
+                <?php echo htmlspecialchars($message); ?>
+            </div>
         <?php endif; ?>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+        <div class="clubs-grid-modern">
             <?php if (!empty($clubs)): ?>
                 <?php foreach ($clubs as $club): ?>
-                <div style="background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
-                    <?php 
-                    $logo_path = !empty($club['Logo']) && file_exists('../assets/images/clubs/' . $club['Logo']) 
-                               ? '../assets/images/clubs/' . $club['Logo'] 
-                               : 'https://via.placeholder.com/100?text=Club'; // Placeholder si pas de logo
-                    ?>
-                    <img src="<?php echo htmlspecialchars($logo_path); ?>" alt="Logo <?php echo htmlspecialchars($club['NomClub']); ?>" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 15px;">
+                <div class="club-card-modern">
+                    <div class="club-logo-modern">
+                        <?php 
+                        $logo_path = !empty($club['Logo']) && file_exists('../uploads/clubs/' . $club['Logo']) 
+                                   ? '../uploads/clubs/' . $club['Logo'] 
+                                   : null;
+                        ?>
+                        <?php if ($logo_path): ?>
+                            <img src="<?php echo htmlspecialchars($logo_path); ?>" alt="Logo <?php echo htmlspecialchars($club['NomClub']); ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--border-radius-lg);">
+                        <?php else: ?>
+                            🏛️
+                        <?php endif; ?>
+                    </div>
                     
-                    <h2 style="font-size: 1.2em; margin-bottom: 10px;"><?php echo htmlspecialchars($club['NomClub']); ?></h2>
-                    <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
-                        <?php echo htmlspecialchars(mb_strimwidth($club['Description'] ?? 'Aucune description fournie.', 0, 100, '...')); ?>
-                    </p>
-                    <p style="font-size: 0.8em; color: #888; margin-bottom: 15px;">Admin: <?php echo htmlspecialchars($club['AdminPrenom'] . ' ' . $club['AdminNom']); ?></p>
-                    <a href="club_detail.php?id=<?php echo (int)$club['IdClub']; ?>" style="background-color: #007bff; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none;">Voir les événements</a>
+                    <div class="club-name-modern"><?php echo htmlspecialchars($club['NomClub']); ?></div>
+                    <div class="club-description-modern">
+                        <?php echo htmlspecialchars(mb_strimwidth($club['Description'] ?? 'Aucune description fournie.', 0, 120, '...')); ?>
+                    </div>
+                    
+                    <div class="club-admin-modern">
+                        <div class="club-admin-label-modern">Administrateur</div>
+                        <div class="club-admin-name-modern"><?php echo htmlspecialchars($club['AdminPrenom'] . ' ' . $club['AdminNom']); ?></div>
+                    </div>
+                    
+                    <div class="club-stats-modern">
+                        <div class="club-stat-modern">
+                            <div class="club-stat-value-modern">12</div>
+                            <div class="club-stat-label-modern">Membres</div>
+                        </div>
+                        <div class="club-stat-modern">
+                            <div class="club-stat-value-modern">5</div>
+                            <div class="club-stat-label-modern">Événements</div>
+                        </div>
+                    </div>
+                    
+                    <div class="club-actions-modern">
+                        <a href="club_detail.php?id=<?php echo (int)$club['IdClub']; ?>" class="btn btn-primary btn-sm">Voir les événements</a>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <p style="grid-column: 1 / -1; text-align: center; color: #888;">Aucun club disponible pour le moment.</p>
+                <div class="empty-state-modern">
+                    <div class="empty-state-icon-modern">🏛️</div>
+                    <h3>Aucun club disponible</h3>
+                    <p>Revenez bientôt pour découvrir les nouveaux clubs.</p>
+                </div>
             <?php endif; ?>
         </div>
     </div>
+
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>

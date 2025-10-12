@@ -110,230 +110,91 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription - Event Manager</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .register-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
-            width: 100%;
-            padding: 40px;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo h1 {
-            color: #667eea;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .logo p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .error {
-            background: #fee;
-            border-left: 4px solid #f44;
-            color: #c33;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .success {
-            background: #efe;
-            border-left: 4px solid #4a4;
-            color: #373;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .captcha-group {
-            display: flex;
-            gap: 15px;
-            align-items: end;
-        }
-
-        .captcha-display {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 5px;
-            text-align: center;
-            min-width: 120px;
-        }
-
-        .captcha-group input {
-            flex: 1;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        .row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
-<body>
+<body class="auth-page">
     <div class="register-container">
-        <div class="logo">
-            <h1>🎉 Event Manager</h1>
-            <p>Créez votre compte</p>
+        <div class="logo-section">
+            <div class="logo-modern">Event Manager</div>
+            <p class="logo-subtitle">Créez votre compte</p>
         </div>
 
         <?php if (!empty($errors)): ?>
-            <div class="error">
-                <?php foreach ($errors as $error): ?>
-                    <div>• <?php echo htmlspecialchars($error); ?></div>
-                <?php endforeach; ?>
+            <div class="error-modern">
+                <ul>
+                    <?php foreach ($errors as $error): ?>
+                        <li><?php echo htmlspecialchars($error); ?></li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         <?php endif; ?>
 
         <?php if ($success): ?>
-            <div class="success"><?php echo htmlspecialchars($success); ?></div>
+            <div class="success-modern"><?php echo htmlspecialchars($success); ?></div>
         <?php endif; ?>
 
         <form method="POST" action="" id="registerForm">
-            <div class="row">
-                <div class="form-group">
-                    <label for="nom">Nom *</label>
-                    <input type="text" id="nom" name="nom" required 
-                           value="<?php echo isset($_POST['nom']) ? htmlspecialchars($_POST['nom']) : ''; ?>">
+            <div class="form-row-modern">
+                <div class="form-group-modern">
+                    <label for="nom" class="form-label-modern">Nom *</label>
+                    <input type="text" id="nom" name="nom" class="form-input-modern" required 
+                           value="<?php echo isset($_POST['nom']) ? htmlspecialchars($_POST['nom']) : ''; ?>"
+                           placeholder="Votre nom">
                 </div>
 
-                <div class="form-group">
-                    <label for="prenom">Prénom *</label>
-                    <input type="text" id="prenom" name="prenom" required 
-                           value="<?php echo isset($_POST['prenom']) ? htmlspecialchars($_POST['prenom']) : ''; ?>">
+                <div class="form-group-modern">
+                    <label for="prenom" class="form-label-modern">Prénom *</label>
+                    <input type="text" id="prenom" name="prenom" class="form-input-modern" required 
+                           value="<?php echo isset($_POST['prenom']) ? htmlspecialchars($_POST['prenom']) : ''; ?>"
+                           placeholder="Votre prénom">
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="email">Email *</label>
-                <input type="email" id="email" name="email" required 
-                       value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+            <div class="form-group-modern">
+                <label for="email" class="form-label-modern">Adresse email *</label>
+                <input type="email" id="email" name="email" class="form-input-modern" required 
+                       value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
+                       placeholder="votre@email.com">
             </div>
 
-            <div class="form-group">
-                <label for="telephone">Téléphone</label>
-                <input type="tel" id="telephone" name="telephone" 
-                       value="<?php echo isset($_POST['telephone']) ? htmlspecialchars($_POST['telephone']) : ''; ?>">
+            <div class="form-group-modern">
+                <label for="telephone" class="form-label-modern">Téléphone</label>
+                <input type="tel" id="telephone" name="telephone" class="form-input-modern"
+                       value="<?php echo isset($_POST['telephone']) ? htmlspecialchars($_POST['telephone']) : ''; ?>"
+                       placeholder="Votre numéro de téléphone">
             </div>
 
-            <div class="form-group">
-                <label for="password">Mot de passe *</label>
-                <input type="password" id="password" name="password" required 
-                       minlength="6" placeholder="Min. 6 caractères">
+            <div class="form-group-modern">
+                <label for="password" class="form-label-modern">Mot de passe *</label>
+                <input type="password" id="password" name="password" class="form-input-modern" required 
+                       minlength="6" placeholder="Minimum 6 caractères">
             </div>
 
-            <div class="form-group">
-                <label for="confirm_password">Confirmer le mot de passe *</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
+            <div class="form-group-modern">
+                <label for="confirm_password" class="form-label-modern">Confirmer le mot de passe *</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input-modern" required
+                       placeholder="Confirmez votre mot de passe">
             </div>
 
-            <div class="form-group" style="display: flex;justify-content: center; margin-top: 20px;">
+            <div class="captcha-section-modern">
                 <div class="g-recaptcha" data-sitekey="6LcxwuUrAAAAADuwTqnQq54AwIgsWsAWQxPVzoj4"></div>
             </div>
 
-            <button type="submit" class="btn-primary">S'inscrire</button>
+            <button type="submit" class="btn-register-modern">Créer mon compte</button>
         </form>
 
-        <div class="login-link">
+        <div class="divider-modern">
+            <span>ou</span>
+        </div>
+
+        <div class="login-link-modern">
             Vous avez déjà un compte ? <a href="login.php">Se connecter</a>
         </div>
     </div>
+    
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>

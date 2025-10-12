@@ -98,358 +98,163 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gérer les clubs</title>
-    <link rel="stylesheet" href="../frontend/css.css">
-    <style>
-        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar {
-            background: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .navbar-brand {
-            font-size: 1.5em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .page-header h1 {
-            font-size: 2em;
-            color: #333;
-            margin: 0;
-        }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #555;
-        }
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        .alert-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-left: 4px solid #4caf50;
-        }
-        .alert-error {
-            background: #ffebee;
-            color: #c62828;
-            border-left: 4px solid #f44336;
-        }
-        .clubs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-        }
-        .club-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .club-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        .club-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .club-logo {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            object-fit: cover;
-            margin-right: 15px;
-            border: 2px solid #f0f0f0;
-        }
-        .club-logo-placeholder {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5em;
-            margin-right: 15px;
-        }
-        .club-info h3 {
-            margin: 0 0 5px 0;
-            color: #333;
-            font-size: 1.3em;
-        }
-        .club-date {
-            color: #666;
-            font-size: 0.9em;
-        }
-        .club-description {
-            color: #555;
-            line-height: 1.5;
-            margin-bottom: 20px;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .club-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .stat-item {
-            text-align: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #667eea;
-        }
-        .stat-label {
-            font-size: 0.85em;
-            color: #666;
-        }
-        .admin-info {
-            background: #e3f2fd;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .admin-info strong {
-            color: #1565c0;
-        }
-        .club-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .btn-icon {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9em;
-        }
-        .btn-view {
-            background: #e3f2fd;
-            color: #2196f3;
-        }
-        .btn-view:hover {
-            background: #2196f3;
-            color: white;
-        }
-        .btn-edit {
-            background: #fff3e0;
-            color: #ff9800;
-        }
-        .btn-edit:hover {
-            background: #ff9800;
-            color: white;
-        }
-        .btn-delete {
-            background: #ffebee;
-            color: #f44336;
-        }
-        .btn-delete:hover {
-            background: #f44336;
-            color: white;
-        }
-        .no-clubs {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-        .no-clubs-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        @media (max-width: 768px) {
-            .clubs-grid {
-                grid-template-columns: 1fr;
-            }
-            .page-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: stretch;
-            }
-            .club-actions {
-                justify-content: center;
-            }
-        }
-    </style>
+    <title>Gérer les clubs - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">🎓 GestionEvents</div>
-        <a href="dashboard.php" class="btn btn-secondary">Retour au dashboard</a>
+    <nav class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">🎓 Event Manager</a>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Super Administrateur</div>
+                </div>
+                <div class="user-avatar-modern"><?php echo strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSION['nom'], 0, 1)); ?></div>
+                <a href="../auth/logout.php" class="btn btn-ghost btn-sm">Déconnexion</a>
+            </div>
+        </div>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <h1>🏢 Gérer les clubs</h1>
-            <a href="creer_club.php" class="btn btn-primary">
-                ➕ Créer un nouveau club
-            </a>
-        </div>
-
-        <?php if (isset($success_message)): ?>
-            <div class="alert alert-success">
-                ✅ <?php echo htmlspecialchars($success_message); ?>
+    <aside class="sidebar-modern">
+        <nav class="sidebar-nav-modern">
+            <div class="sidebar-section-modern">
+                <div class="sidebar-title-modern">Administration</div>
+                <ul class="sidebar-nav-modern">
+                    <li class="sidebar-nav-item-modern">
+                        <a href="dashboard.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📊</div>
+                            Tableau de bord
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="gerer_clubs.php" class="sidebar-nav-link-modern active">
+                            <div class="sidebar-nav-icon-modern">🏛️</div>
+                            Gérer les clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="liste_admins.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">👥</div>
+                            Admins des clubs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="evenements.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📅</div>
+                            Les événements
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="utilisateurs.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">👤</div>
+                            Les utilisateurs
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="emails.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">📧</div>
+                            Envoyer un email
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="validations.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">✅</div>
+                            Validations
+                        </a>
+                    </li>
+                </ul>
             </div>
-        <?php endif; ?>
+        </nav>
+    </aside>
 
-        <?php if (isset($error_message)): ?>
-            <div class="alert alert-error">
-                ❌ <?php echo htmlspecialchars($error_message); ?>
-            </div>
-        <?php endif; ?>
+    <div class="layout">
+        <main class="main-content">
+            <?php if (isset($success_message)): ?>
+                <div class="alert-modern alert-success-modern">
+                    <?php echo htmlspecialchars($success_message); ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if (empty($clubs)): ?>
-            <div class="no-clubs">
-                <div class="no-clubs-icon">🏢</div>
-                <h3>Aucun club trouvé</h3>
-                <p>Commencez par créer votre premier club.</p>
-                <a href="creer_club.php" class="btn btn-primary" style="margin-top: 20px;">
+            <?php if (isset($error_message)): ?>
+                <div class="alert-modern alert-error-modern">
+                    <?php echo htmlspecialchars($error_message); ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="page-title">
+                <div>
+                    <h1>Gérer les clubs</h1>
+                    <p>Supervisez et gérez tous les clubs de la plateforme</p>
+                </div>
+                <a href="creer_club.php" class="btn btn-primary">
                     ➕ Créer un club
                 </a>
             </div>
-        <?php else: ?>
-            <div class="clubs-grid">
-                <?php foreach ($clubs as $club): ?>
-                    <div class="club-card">
-                        <div class="club-header">
-                            <?php if (!empty($club['Logo'])): ?>
-                                <img src="../uploads/clubs/<?php echo htmlspecialchars($club['Logo']); ?>" 
-                                     class="club-logo" 
-                                     alt="Logo <?php echo htmlspecialchars($club['NomClub']); ?>">
-                            <?php else: ?>
-                                <div class="club-logo-placeholder">
-                                    🏢
+
+            <?php if (empty($clubs)): ?>
+                <div class="empty-state-modern">
+                    <div class="empty-state-icon-modern">🏛️</div>
+                    <h3>Aucun club trouvé</h3>
+                    <p>Commencez par créer votre premier club pour organiser des événements.</p>
+                    <a href="creer_club.php" class="btn btn-primary">Créer un club</a>
+                </div>
+            <?php else: ?>
+                <div class="clubs-grid-modern">
+                    <?php foreach ($clubs as $club): ?>
+                        <div class="club-card-modern">
+                            <div class="club-header-modern">
+                                <?php if (!empty($club['Logo'])): ?>
+                                    <img src="../uploads/clubs/<?php echo htmlspecialchars($club['Logo']); ?>" 
+                                         alt="Logo <?php echo htmlspecialchars($club['NomClub']); ?>" 
+                                         class="club-logo-modern">
+                                <?php else: ?>
+                                    <div class="club-logo-modern">🏛️</div>
+                                <?php endif; ?>
+                                <div class="club-info-modern">
+                                    <h3 class="club-name-modern"><?php echo htmlspecialchars($club['NomClub']); ?></h3>
+                                    <p class="club-date-modern">Créé le <?php echo date('d/m/Y', strtotime($club['DateCreation'])); ?></p>
                                 </div>
-                            <?php endif; ?>
-                            <div class="club-info">
-                                <h3><?php echo htmlspecialchars($club['NomClub']); ?></h3>
-                                <div class="club-date">
-                                    Créé le <?php echo date('d/m/Y', strtotime($club['DateCreation'])); ?>
+                            </div>
+                            
+                            <div class="club-description-modern">
+                                <?php echo htmlspecialchars($club['Description'] ?: 'Aucune description disponible.'); ?>
+                            </div>
+                            
+                            <div class="club-stats-modern">
+                                <div class="club-stat-modern">
+                                    <div class="club-stat-value-modern"><?php echo $club['nb_membres']; ?></div>
+                                    <div class="club-stat-label-modern">Membres</div>
+                                </div>
+                                <div class="club-stat-modern">
+                                    <div class="club-stat-value-modern"><?php echo $club['nb_evenements']; ?></div>
+                                    <div class="club-stat-label-modern">Événements</div>
                                 </div>
                             </div>
-                        </div>
-
-                        <?php if (!empty($club['Description'])): ?>
-                            <div class="club-description">
-                                <?php echo htmlspecialchars($club['Description']); ?>
+                            
+                            <div class="club-admin-modern">
+                                <div class="club-admin-label-modern">Administrateur</div>
+                                <div><?php echo htmlspecialchars($club['admin_prenom'] . ' ' . $club['admin_nom']); ?></div>
                             </div>
-                        <?php endif; ?>
-
-                        <div class="club-stats">
-                            <div class="stat-item">
-                                <div class="stat-value"><?php echo $club['nb_membres']; ?></div>
-                                <div class="stat-label">Membres</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value"><?php echo $club['nb_evenements']; ?></div>
-                                <div class="stat-label">Événements</div>
+                            
+                            <div class="club-actions-modern">
+                                <a href="recap_club.php?id=<?php echo $club['IdClub']; ?>" class="btn btn-outline btn-sm">Voir</a>
+                                <a href="creer_club.php?edit=<?php echo $club['IdClub']; ?>" class="btn btn-outline btn-sm">Modifier</a>
+                                <form method="POST" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce club ?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="club_id" value="<?php echo $club['IdClub']; ?>">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="color: var(--error); border-color: var(--error);">Supprimer</button>
+                                </form>
                             </div>
                         </div>
-
-                        <?php if (!empty($club['admin_prenom'])): ?>
-                            <div class="admin-info">
-                                <strong>👤 Administrateur :</strong><br>
-                                <?php echo htmlspecialchars($club['admin_prenom'] . ' ' . $club['admin_nom']); ?><br>
-                                <small><?php echo htmlspecialchars($club['admin_email']); ?></small>
-                            </div>
-                        <?php else: ?>
-                            <div class="admin-info" style="background: #fff3e0; color: #e65100;">
-                                <strong>⚠️ Aucun administrateur assigné</strong>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="club-actions">
-                            <a href="recap_club.php?id=<?php echo $club['IdClub']; ?>" 
-                               class="btn-icon btn-view" title="Voir les détails">
-                                👁️ Détails
-                            </a>
-                            <a href="creer_club.php?edit=<?php echo $club['IdClub']; ?>" 
-                               class="btn-icon btn-edit" title="Modifier">
-                                ✏️ Modifier
-                            </a>
-                            <button class="btn-icon btn-delete" 
-                                    title="Supprimer" 
-                                    onclick="confirmDelete(<?php echo $club['IdClub']; ?>, '<?php echo htmlspecialchars($club['NomClub']); ?>')">
-                                🗑️ Supprimer
-                            </button>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </main>
     </div>
 
-    <!-- Formulaire de suppression caché -->
-    <form id="deleteForm" method="POST" style="display: none;">
-        <input type="hidden" name="action" value="delete">
-        <input type="hidden" name="club_id" id="deleteClubId">
-    </form>
-
-    <script>
-        function confirmDelete(clubId, clubName) {
-            if (confirm(`Êtes-vous sûr de vouloir supprimer le club "${clubName}" ?\n\nCette action est irréversible.`)) {
-                document.getElementById('deleteClubId').value = clubId;
-                document.getElementById('deleteForm').submit();
-            }
-        }
-    </script>
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>

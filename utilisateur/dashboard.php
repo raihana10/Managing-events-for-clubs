@@ -85,174 +85,205 @@ $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Espace - Utilisateur</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <style>
-        body { margin: 0; background: #f5f7fa; font-family: 'Segoe UI', sans-serif; }
-        .navbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .navbar-brand { font-size: 1.5em; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .navbar-menu { display: flex; gap: 30px; align-items: center; }
-        .navbar-menu a { color: #555; text-decoration: none; font-weight: 500; transition: color 0.3s; }
-        .navbar-menu a:hover { color: #667eea; }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
-        .btn-logout { padding: 8px 20px; background: #f44336; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
-        .welcome-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px; color: white; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(102,126,234,0.3); }
-        .welcome-section h1 { font-size: 2.5em; margin-bottom: 10px; }
-        .welcome-section p { font-size: 1.1em; opacity: 0.95; }
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-box { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
-        .stat-icon { font-size: 3em; margin-bottom: 10px; }
-        .stat-number { font-size: 2.5em; font-weight: bold; color: #667eea; }
-        .stat-label { color: #666; font-size: 0.95em; margin-top: 5px; }
-        .section { background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .section-header h2 { color: #333; font-size: 1.8em; }
-        .btn { padding: 10px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; text-decoration: none; display: inline-block; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-primary:hover { transform: translateY(-2px); }
-        .btn-outline { background: white; border: 2px solid #667eea; color: #667eea; }
-        .btn-outline:hover { background: #667eea; color: white; }
-        .clubs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .club-card { border: 2px solid #f0f0f0; border-radius: 15px; padding: 25px; transition: all 0.3s; cursor: pointer; }
-        .club-card:hover { border-color: #667eea; box-shadow: 0 8px 20px rgba(102,126,234,0.15); transform: translateY(-5px); }
-        .club-logo { width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 2.5em; margin-bottom: 15px; color: #fff; }
-        .club-name { font-size: 1.3em; font-weight: 600; color: #333; margin-bottom: 10px; }
-        .club-actions { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-sm { padding: 8px 15px; font-size: 0.9em; }
-        .event-list { display: flex; flex-direction: column; gap: 20px; }
-        .event-item { border: 2px solid #f0f0f0; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
-        .event-item:hover { border-color: #667eea; box-shadow: 0 4px 15px rgba(102,126,234,0.1); }
-        .event-left { flex: 1; }
-        .event-date-badge { background: #ede7f6; color: #667eea; padding: 8px 15px; border-radius: 8px; font-weight: 600; font-size: 0.9em; display: inline-block; margin-bottom: 10px; }
-        .event-title { font-size: 1.3em; font-weight: 600; color: #333; margin-bottom: 10px; }
-        .event-meta { display: flex; gap: 20px; color: #666; font-size: 0.95em; }
-        .event-meta span { display: flex; align-items: center; gap: 5px; }
-        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 500; }
-        @media (max-width: 768px) { .navbar-menu { display: none; } .welcome-section { padding: 25px; } .welcome-section h1 { font-size: 1.8em; } .event-item { flex-direction: column; align-items: flex-start; gap: 15px; } }
-    </style>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // rien pour l'instant
-    });
-    </script>
-    
+    <title>Mon Espace - Event Manager</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">GestionEvents</div>
-        <div class="navbar-menu">
-            <a href="dashboard.php">Accueil</a>
-            <a href="clubs.php">Clubs</a>
-            <a href="evenements.php">Événements</a>
-            <a href="mes_evenements.php">Mes Événements</a>
+    <header class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">Event Manager</a>
+            <nav class="nav-main">
+                <a href="dashboard.php" class="nav-link-modern active">Accueil</a>
+                <a href="clubs.php" class="nav-link-modern">Clubs</a>
+                <a href="evenements.php" class="nav-link-modern">Événements</a>
+                <a href="mes_inscriptions.php" class="nav-link-modern">Mes inscriptions</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Participant</div>
+                </div>
+                <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
+                <div class="user-avatar-modern"><?php echo $initials; ?></div>
+                <button class="btn btn-ghost btn-sm" onclick="window.location.href='../auth/logout.php'">Déconnexion</button>
+            </div>
         </div>
-        <div class="user-info">
-            <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
-            <div class="user-avatar"><?php echo $initials; ?></div>
-            <span><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></span>
-            <button class="btn-logout" onclick="window.location.href='../auth/logout.php'">Déconnexion</button>
-        </div>
-    </nav>
+    </header>
 
     <div class="container">
-        <div class="welcome-section">
-            <h1>Bienvenue, <?php echo htmlspecialchars($_SESSION['prenom']); ?> !</h1>
-            <p>Découvrez les clubs et événements de votre école</p>
-        </div>
-
-        <div class="stats-row">
-            <div class="stat-box">
-                <div class="stat-icon">■</div>
-                <div class="stat-number"><?php echo (int)$stats['nb_clubs']; ?></div>
-                <div class="stat-label">Clubs rejoints</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-icon">■</div>
-                <div class="stat-number"><?php echo (int)$stats['nb_inscriptions']; ?></div>
-                <div class="stat-label">Événements inscrits</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-icon">■</div>
-                <div class="stat-number">0</div>
-                <div class="stat-label">Événements participés</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-icon">■</div>
-                <div class="stat-number">0</div>
-                <div class="stat-label">Attestations</div>
+        <div class="dashboard-hero">
+            <div class="dashboard-hero-content">
+                <h1>Bienvenue, <?php echo htmlspecialchars($_SESSION['prenom']); ?> !</h1>
+                <p>Découvrez les clubs et événements de votre école</p>
             </div>
         </div>
 
-        <div class="section">
-            <div class="section-header">
-                <h2>Mes clubs</h2>
-                <a href="clubs.php" class="btn btn-primary">Découvrir plus →</a>
-            </div>
-            <div class="clubs-grid">
-                <?php foreach ($clubs as $club): ?>
-                <div class="club-card">
-                    <div class="club-logo">■</div>
-                    <div class="club-name"><?php echo htmlspecialchars($club['NomClub']); ?></div>
-                    <p style="color: #666; font-size: 0.95em;">
-                        <?php echo htmlspecialchars(mb_strimwidth($club['Description'] ?? '', 0, 100, '...')); ?>
-                    </p>
-                    <div class="club-actions">
-                        <a href="club_detail.php?id=<?php echo (int)$club['IdClub']; ?>" class="btn btn-primary btn-sm">Voir les événements</a>
-                    </div>
+        <div class="stats-grid-modern">
+            <div class="stat-card-modern">
+                <div class="stat-header-modern">
+                    <div class="stat-label-modern">Clubs rejoints</div>
+                    <div class="stat-icon-modern coral">👥</div>
                 </div>
-                <?php endforeach; ?>
-                <?php if (empty($clubs)): ?>
-                    <div class="empty-state" style="grid-column: 1 / -1; color:#666;">
-                        <div class="empty-state-icon">■</div>
-                        <h3>Aucun club disponible</h3>
-                        <p>Découvrez les clubs depuis la page Clubs.</p>
-                    </div>
-                <?php endif; ?>
+                <div class="stat-value-modern"><?php echo (int)$stats['nb_clubs']; ?></div>
+                <div class="stat-change-modern positive">+2 cette semaine</div>
+            </div>
+            <div class="stat-card-modern">
+                <div class="stat-header-modern">
+                    <div class="stat-label-modern">Événements inscrits</div>
+                    <div class="stat-icon-modern teal">📅</div>
+                </div>
+                <div class="stat-value-modern"><?php echo (int)$stats['nb_inscriptions']; ?></div>
+                <div class="stat-change-modern positive">+1 cette semaine</div>
+            </div>
+            <div class="stat-card-modern">
+                <div class="stat-header-modern">
+                    <div class="stat-label-modern">Événements participés</div>
+                    <div class="stat-icon-modern blue">✅</div>
+                </div>
+                <div class="stat-value-modern">0</div>
+                <div class="stat-change-modern">Aucun récent</div>
+            </div>
+            <div class="stat-card-modern">
+                <div class="stat-header-modern">
+                    <div class="stat-label-modern">Attestations</div>
+                    <div class="stat-icon-modern purple">📜</div>
+                </div>
+                <div class="stat-value-modern">0</div>
+                <div class="stat-change-modern">Aucune disponible</div>
             </div>
         </div>
 
-        <div class="section">
-            <div class="section-header">
-                <h2>Prochains événements</h2>
-                <a href="evenements.php" class="btn btn-outline">Voir tous les événements →</a>
+        <div class="quick-actions-modern">
+            <h2 class="quick-actions-title-modern">Actions rapides</h2>
+            <div class="actions-grid-modern">
+                <a href="clubs.php" class="action-card-modern">
+                    <div class="action-icon-modern">🏛️</div>
+                    <div class="action-content-modern">
+                        <div class="action-title-modern">Découvrir les clubs</div>
+                        <div class="action-description-modern">Explorez tous les clubs disponibles</div>
+                    </div>
+                </a>
+                <a href="evenements.php" class="action-card-modern">
+                    <div class="action-icon-modern">🎯</div>
+                    <div class="action-content-modern">
+                        <div class="action-title-modern">Voir les événements</div>
+                        <div class="action-description-modern">Découvrez les prochains événements</div>
+                    </div>
+                </a>
+                <a href="mes_inscriptions.php" class="action-card-modern">
+                    <div class="action-icon-modern">📋</div>
+                    <div class="action-content-modern">
+                        <div class="action-title-modern">Mes inscriptions</div>
+                        <div class="action-description-modern">Gérez vos inscriptions</div>
+                    </div>
+                </a>
             </div>
-            <div class="event-list">
-                <?php foreach ($evenements as $event): ?>
-                <div class="event-item">
-                    <div class="event-left">
-                        <div class="event-date-badge"><?php echo date('d F Y', strtotime($event['Date'])); ?></div>
-                        <div class="event-title"><?php echo htmlspecialchars($event['NomEvenement']); ?></div>
-                        <div class="event-meta">
-                            <span>■ <?php echo htmlspecialchars($event['NomClub']); ?></span>
-                            <span>■ <?php echo htmlspecialchars($event['Lieu']); ?></span>
-                            <span>■ <?php echo htmlspecialchars($event['HeureDebut'] . ' - ' . $event['HeureFin']); ?></span>
-                            <span>€ 
-                                <?php if ($event['user_price'] == 0 || $event['user_price'] === null): ?>
-                                    <span style="color: #28a745; font-weight: bold;">Gratuit</span>
-                                <?php else: ?>
-                                    <span style="color: #007bff; font-weight: bold;"><?php echo number_format(floatval($event['user_price']), 2); ?> €</span>
-                                <?php endif; ?>
-                                <small>(<?php echo $event['user_type']; ?>)</small>
-                            </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Mes clubs</h3>
+                    <a href="clubs.php" class="btn btn-primary btn-sm">Voir tout →</a>
+                </div>
+                <div class="card-body">
+                    <div class="clubs-grid-modern">
+                        <?php foreach ($clubs as $club): ?>
+                        <div class="club-card-modern">
+                            <div class="club-logo-modern">🏛️</div>
+                            <div class="club-name-modern"><?php echo htmlspecialchars($club['NomClub']); ?></div>
+                            <div class="club-description-modern">
+                                <?php echo htmlspecialchars(mb_strimwidth($club['Description'] ?? '', 0, 100, '...')); ?>
+                            </div>
+                            <div class="club-stats-modern">
+                                <div class="club-stat-modern">
+                                    <div class="club-stat-value-modern">12</div>
+                                    <div class="club-stat-label-modern">Membres</div>
+                                </div>
+                                <div class="club-stat-modern">
+                                    <div class="club-stat-value-modern">5</div>
+                                    <div class="club-stat-label-modern">Événements</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-sm">
+                                <a href="club_detail.php?id=<?php echo (int)$club['IdClub']; ?>" class="btn btn-primary btn-sm">Voir les événements</a>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <a href="inscription_evenement.php?id=<?php echo (int)$event['IdEvenement']; ?>" class="btn btn-primary btn-sm">Voir détails</a>
+                        <?php endforeach; ?>
+                        <?php if (empty($clubs)): ?>
+                            <div class="text-center p-xl" style="grid-column: 1 / -1;">
+                                <div class="text-neutral-500 mb-md">
+                                    <div style="font-size: 3rem; margin-bottom: 1rem;">🏛️</div>
+                                    <h3>Aucun club disponible</h3>
+                                    <p>Découvrez les clubs depuis la page Clubs.</p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <?php endforeach; ?>
-                <?php if (empty($evenements)): ?>
-                <div class="empty-state" style="width:100%">
-                    <div class="empty-state-icon">■</div>
-                    <h3>Aucun événement à venir</h3>
-                    <p>Revenez bientôt pour découvrir les prochains événements.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Prochains événements</h3>
+                    <a href="evenements.php" class="btn btn-outline btn-sm">Voir tous →</a>
                 </div>
-                <?php endif; ?>
+                <div class="card-body">
+                    <div class="events-grid-modern">
+                        <?php foreach ($evenements as $event): ?>
+                        <div class="event-card-modern">
+                            <div class="event-image-modern">
+                                <div class="event-date-badge-modern"><?php echo date('d F Y', strtotime($event['Date'])); ?></div>
+                            </div>
+                            <div class="event-content-modern">
+                                <div class="event-title-modern"><?php echo htmlspecialchars($event['NomEvenement']); ?></div>
+                                <div class="event-meta-modern">
+                                    <div class="event-meta-item-modern">
+                                        <div class="event-meta-icon-modern">🏛️</div>
+                                        <span><?php echo htmlspecialchars($event['NomClub']); ?></span>
+                                    </div>
+                                    <div class="event-meta-item-modern">
+                                        <div class="event-meta-icon-modern">📍</div>
+                                        <span><?php echo htmlspecialchars($event['Lieu']); ?></span>
+                                    </div>
+                                    <div class="event-meta-item-modern">
+                                        <div class="event-meta-icon-modern">⏰</div>
+                                        <span><?php echo htmlspecialchars($event['HeureDebut'] . ' - ' . $event['HeureFin']); ?></span>
+                                    </div>
+                                </div>
+                                <div class="event-price-modern">
+                                    <div class="price-modern">
+                                        <?php if ($event['user_price'] == 0 || $event['user_price'] === null): ?>
+                                            <span class="price-free-modern">Gratuit</span>
+                                        <?php else: ?>
+                                            <?php echo number_format(floatval($event['user_price']), 2); ?> €
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="badge badge-info"><?php echo $event['user_type']; ?></div>
+                                </div>
+                                <div class="event-actions-modern">
+                                    <a href="inscription_evenement.php?id=<?php echo (int)$event['IdEvenement']; ?>" class="btn btn-primary btn-sm">Voir détails</a>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                        <?php if (empty($evenements)): ?>
+                            <div class="text-center p-xl">
+                                <div class="text-neutral-500 mb-md">
+                                    <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                                    <h3>Aucun événement à venir</h3>
+                                    <p>Revenez bientôt pour découvrir les prochains événements.</p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>

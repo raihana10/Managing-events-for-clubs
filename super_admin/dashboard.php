@@ -41,7 +41,7 @@ try {
     $total_users = $stmt_users->fetch(PDO::FETCH_ASSOC)['total'];
     
     // Nombre d'emails envoyés
-    $sql_emails = "SELECT COUNT(*) as total FROM email";
+    $sql_emails = "SELECT COUNT(*) as total FROM emailadmin";
     $stmt_emails = $conn->prepare($sql_emails);
     $stmt_emails->execute();
     $total_emails = $stmt_emails->fetch(PDO::FETCH_ASSOC)['total'];
@@ -146,6 +146,12 @@ $initiales_admin = strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSI
                             Validations
                         </a>
                     </li>
+                    <li class="sidebar-nav-item-modern">
+                        <a href="parametres.php" class="sidebar-nav-link-modern">
+                            <div class="sidebar-nav-icon-modern">⚙️</div>
+                            Paramètres
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -165,7 +171,7 @@ $initiales_admin = strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSI
                             <div class="stat-icon-modern coral">🏛️</div>
                         </div>
                         <div class="stat-value-modern"><?php echo $total_clubs; ?></div>
-                        <div class="stat-change-modern positive">+3 ce mois</div>
+                        
                     </div>
                     <div class="stat-card-modern">
                         <div class="stat-header-modern">
@@ -173,7 +179,7 @@ $initiales_admin = strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSI
                             <div class="stat-icon-modern teal">📅</div>
                         </div>
                         <div class="stat-value-modern"><?php echo $total_events_mois; ?></div>
-                        <div class="stat-change-modern positive">+12 cette semaine</div>
+                        
                     </div>
                     <div class="stat-card-modern">
                         <div class="stat-header-modern">
@@ -181,7 +187,7 @@ $initiales_admin = strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSI
                             <div class="stat-icon-modern blue">👥</div>
                         </div>
                         <div class="stat-value-modern"><?php echo $total_users; ?></div>
-                        <div class="stat-change-modern positive">+25 cette semaine</div>
+                        
                     </div>
                     <div class="stat-card-modern">
                         <div class="stat-header-modern">
@@ -189,7 +195,7 @@ $initiales_admin = strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSI
                             <div class="stat-icon-modern purple">📧</div>
                         </div>
                         <div class="stat-value-modern"><?php echo $total_emails; ?></div>
-                        <div class="stat-change-modern positive">+8 cette semaine</div>
+                       
                     </div>
                 </div>
 
@@ -267,7 +273,7 @@ $initiales_admin = strtoupper(substr($_SESSION['prenom'], 0, 1) . substr($_SESSI
                                     <td><?php echo date('d/m/Y', strtotime($club['DateCreation'])); ?></td>
                                     <td>
                                         <div class="flex gap-sm">
-                                            <button class="btn btn-outline btn-sm" title="Voir" onclick="window.location.href='voir_club.php?id=<?php echo $club['IdClub']; ?>'">Voir</button>
+                                            <button class="btn btn-outline btn-sm" title="Voir" onclick="window.location.href='gerer_clubs.php?id=<?php echo $club['IdClub']; ?>'">Voir</button>
                                             <button class="btn btn-outline btn-sm" title="Modifier" onclick="window.location.href='modifier_club.php?id=<?php echo $club['IdClub']; ?>'">Modifier</button>
                                             <button class="btn btn-outline btn-sm" title="Supprimer" onclick="confirmDelete(<?php echo $club['IdClub']; ?>)">Supprimer</button>
                                         </div>

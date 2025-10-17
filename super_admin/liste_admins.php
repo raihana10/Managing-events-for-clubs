@@ -34,24 +34,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $nb_clubs = $stmt_check->fetch(PDO::FETCH_ASSOC)['nb_clubs'];
                         
                         if ($nb_clubs > 0) {
-                            $error_message = "Impossible de supprimer cet administrateur car il gère des clubs.";
+                            $error_message = "Impossible de modifier le rôle de cet administrateur car il gère des clubs.";
                         } else {
-                            // Supprimer l'administrateur
-                            $sql_delete = "DELETE FROM Utilisateur WHERE IdUtilisateur = :admin_id AND Role = 'organisateur'";
-                            $stmt_delete = $conn->prepare($sql_delete);
-                            $stmt_delete->bindParam(':admin_id', $admin_id);
+                            // Changer le rôle de organisateur à participant
+                            $sql_update = "UPDATE Utilisateur SET Role = 'participant' WHERE IdUtilisateur = :admin_id AND Role = 'organisateur'";
+                            $stmt_update = $conn->prepare($sql_update);
+                            $stmt_update->bindParam(':admin_id', $admin_id);
                             
-                            if ($stmt_delete->execute()) {
-                                $success_message = "Administrateur supprimé avec succès.";
+                            if ($stmt_update->execute()) {
+                                $success_message = "Rôle de l'administrateur modifié avec succès (devenu participant).";
                             } else {
-                                $error_message = "Erreur lors de la suppression de l'administrateur.";
+                                $error_message = "Erreur lors de la modification du rôle.";
                             }
                         }
                     } catch (PDOException $e) {
                         $error_message = "Erreur de base de données : " . $e->getMessage();
                     }
                 }
-                break;
+            break;
         }
     }
 }
@@ -255,16 +255,9 @@ try {
                                 <td><?php echo date('d/m/Y', strtotime($admin['DateInscription'])); ?></td>
                                 <td>
                                     <div class="flex gap-sm">
-                                        <button class="btn btn-primary btn-sm" title="Voir le profil">
-                                            👁️
-                                        </button>
-                                        <button class="btn btn-secondary btn-sm" title="Modifier">
-                                            ✏️
-                                        </button>
-                                        <button class="btn btn-ghost btn-sm" 
-                                                title="Supprimer" 
+                                        <button class="btn btn-outline btn-sm" title="Supprimer" 
                                                 onclick="confirmDelete(<?php echo $admin['IdUtilisateur']; ?>, '<?php echo htmlspecialchars($admin['Prenom'] . ' ' . $admin['Nom']); ?>')">
-                                            🗑️
+                                            Rétrograder
                                         </button>
                                     </div>
                                 </td>
@@ -287,7 +280,7 @@ try {
 
     <script>
         function confirmDelete(adminId, adminName) {
-            if (confirm(`Êtes-vous sûr de vouloir supprimer l'administrateur "${adminName}" ?\n\nCette action est irréversible.`)) {
+            if (confirm(`Êtes-vous sûr de vouloir modifier le rôle de l'administrateur "${adminName}" ?\n\nIl deviendra un simple participant.`)) {
                 document.getElementById('deleteAdminId').value = adminId;
                 document.getElementById('deleteForm').submit();
             }

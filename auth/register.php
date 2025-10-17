@@ -24,6 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Email invalide.";
     }
 
+    // Validation du téléphone (optionnel mais doit être valide si fourni)
+    if (!empty($telephone)) {
+        // Format français : 0 suivi de 9 chiffres (10 chiffres au total)
+        if (!preg_match('/^0[1-9][0-9]{8}$/', $telephone)) {
+            $errors[] = "Le numéro de téléphone doit être au format suivante : 0XXXXXXXXX (10 chiffres)";
+        }
+    }
+
     if (strlen($password) < 6) {
         $errors[] = "Le mot de passe doit contenir au moins 6 caractères.";
     }

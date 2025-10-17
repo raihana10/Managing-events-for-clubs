@@ -1,10 +1,12 @@
 <?php
-/**
- * Envoi d'emails - Backend PHP
- */
-
 require_once '../config/database.php';
 require_once '../config/session.php';
+require '../vendor/phpmailer/src/PHPMailer.php';
+require '../vendor/phpmailer/src/SMTP.php';
+require '../vendor/phpmailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 // Vérifier que c'est bien un super admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'administrateur') {
@@ -23,6 +25,81 @@ $destinataires = $sujet = $message = '';
 $errors = [];
 $success = false;
 $emails_envoyes = 0;
+$emails_echoues = 0;
+
+// Fonction pour envoyer un email via PHPMailer
+function envoyerEmailPHPMailer($destinataire_email, $destinataire_nom, $sujet, $message) {
+    $mail = new PHPMailer(true);
+    
+    try {
+        // Configuration SMTP (identique à test_gmail.php)
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'mohito.raihana@gmail.com';
+        $mail->Password = 'pqie uzik iuym wsgl';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+        
+        // Configuration SSL
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+        
+        $mail->SMTPAutoTLS = false;
+        $mail->Timeout = 30;
+        $mail->SMTPDebug = 0; // Désactiver le debug en production
+        $mail->CharSet = 'UTF-8';
+
+        // Expéditeur et destinataire
+        $mail->setFrom('mohito.raihana@gmail.com', 'Event Manager - Administration');
+        $mail->addAddress($destinataire_email, $destinataire_nom);
+        
+        // Contenu de l'email
+        $mail->isHTML(true);
+        $mail->Subject = $sujet;
+        $mail->Body = '
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1 style="color: white; margin: 0;">🎓 Event Manager</h1>
+                    <p style="color: #f0f0f0; margin: 5px 0 0 0;">Gestion des événements de clubs</p>
+                </div>
+                
+                <div style="background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px;">
+                    <h2 style="color: #333; margin-top: 0;">Bonjour ' . htmlspecialchars($destinataire_nom) . ',</h2>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        ' . nl2br(htmlspecialchars($message)) . '
+                    </div>
+                    
+                    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+                    
+                    <p style="color: #666; font-size: 14px; margin: 0;">
+                        Cordialement,<br>
+                        <strong>L\'équipe Event Manager</strong>
+                    </p>
+                    
+                    <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                        📅 Email envoyé le ' . date('d/m/Y à H:i') . '
+                    </p>
+                </div>
+            </div>
+        ';
+        
+        $mail->AltBody = strip_tags($message);
+
+        // Envoyer l'email
+        $mail->send();
+        return ['success' => true, 'message' => 'Email envoyé avec succès'];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Erreur : ' . $mail->ErrorInfo];
+    }
+}
 
 // Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -50,16 +127,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Si aucune erreur, traiter l'envoi
     if (empty($errors)) {
         try {
-            $conn->beginTransaction();
-            
             // Récupérer les informations des destinataires
             $destinataires_info = [];
             
-            if (in_array('tous_organisateurs', $destinataires)) {
+            if (in_array('all', $destinataires)) {
                 $sql_org = "SELECT IdUtilisateur, Nom, Prenom, Email FROM Utilisateur WHERE Role = 'organisateur'";
                 $stmt_org = $conn->prepare($sql_org);
                 $stmt_org->execute();
-                $destinataires_info = array_merge($destinataires_info, $stmt_org->fetchAll(PDO::FETCH_ASSOC));
+                $destinataires_info = $stmt_org->fetchAll(PDO::FETCH_ASSOC);
             } else {
                 // Destinataires spécifiques sélectionnés
                 foreach ($destinataires as $dest_id) {
@@ -80,35 +155,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $destinataires_info = array_unique($destinataires_info, SORT_REGULAR);
             
             if (!empty($destinataires_info)) {
-                // Enregistrer chaque email individuellement
+                $conn->beginTransaction();
+                
+                // Envoyer l'email à chaque destinataire
                 foreach ($destinataires_info as $dest) {
-                    $sql_email = "INSERT INTO EmailAdmin (IdAdmin, DestinataireEmail, DestinataireNom, Objet, Contenu, TypeEmail) 
-                                 VALUES (:id_admin, :destinataire_email, :destinataire_nom, :objet, :contenu, 'general')";
+                    $nom_complet = $dest['Prenom'] . ' ' . $dest['Nom'];
                     
-                    $stmt_email = $conn->prepare($sql_email);
-                    $stmt_email->bindParam(':id_admin', $_SESSION['user_id']);
-                    $stmt_email->bindParam(':destinataire_email', $dest['Email']);
-                    $stmt_email->bindParam(':destinataire_nom', $dest['Prenom'] . ' ' . $dest['Nom']);
-                    $stmt_email->bindParam(':objet', $sujet);
-                    $stmt_email->bindParam(':contenu', $message);
-                    $stmt_email->execute();
+                    // 🔥 ENVOI RÉEL DE L'EMAIL via PHPMailer
+                    $resultat = envoyerEmailPHPMailer($dest['Email'], $nom_complet, $sujet, $message);
                     
-                    $emails_envoyes++;
+                    if ($resultat['success']) {
+                        // Enregistrer dans la base de données uniquement si l'envoi a réussi
+                        $sql_email = "INSERT INTO EmailAdmin (IdAdmin, DestinataireEmail, DestinataireNom, Objet, Contenu, TypeEmail, DateEnvoi) 
+                                     VALUES (:id_admin, :destinataire_email, :destinataire_nom, :objet, :contenu, 'general', NOW())";
+                        
+                        $stmt_email = $conn->prepare($sql_email);
+                        $stmt_email->bindParam(':id_admin', $_SESSION['user_id']);
+                        $stmt_email->bindParam(':destinataire_email', $dest['Email']);
+                        $stmt_email->bindParam(':destinataire_nom', $nom_complet);
+                        $stmt_email->bindParam(':objet', $sujet);
+                        $stmt_email->bindParam(':contenu', $message);
+                        $stmt_email->execute();
+                        
+                        $emails_envoyes++;
+                    } else {
+                        $emails_echoues++;
+                        $errors['envoi'][] = "Échec pour " . $dest['Email'] . " : " . $resultat['message'];
+                    }
                 }
                 
                 $conn->commit();
-                $success = true;
-                $success_message = "Email envoyé avec succès à " . $emails_envoyes . " organisateur(s).";
                 
-                // Réinitialiser le formulaire
-                $destinataires = $sujet = $message = '';
+                if ($emails_envoyes > 0) {
+                    $success = true;
+                    $success_message = "✅ $emails_envoyes email(s) envoyé(s) avec succès";
+                    if ($emails_echoues > 0) {
+                        $success_message .= " ($emails_echoues échec(s))";
+                    }
+                    
+                    // Réinitialiser le formulaire
+                    $destinataires = $sujet = $message = '';
+                }
+                
             } else {
                 $errors['general'] = "Aucun organisateur trouvé.";
             }
             
         } catch (Exception $e) {
-            $conn->rollBack();
-            $errors['general'] = "Erreur lors de l'envoi de l'email : " . $e->getMessage();
+            if ($conn->inTransaction()) {
+                $conn->rollBack();
+            }
+            $errors['general'] = "Erreur lors de l'envoi : " . $e->getMessage();
         }
     }
 }
@@ -252,8 +349,14 @@ try {
                     <div class="alert-content-modern">
                         <div class="alert-title-modern">Erreur</div>
                         <div class="alert-message-modern">
-                            <?php foreach ($errors as $error): ?>
-                                <div><?php echo htmlspecialchars($error); ?></div>
+                            <?php foreach ($errors as $key => $error): ?>
+                                <?php if (is_array($error)): ?>
+                                    <?php foreach ($error as $err): ?>
+                                        <div><?php echo htmlspecialchars($err); ?></div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div><?php echo htmlspecialchars($error); ?></div>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -291,8 +394,8 @@ try {
                 <form method="POST" class="form-modern">
                     <div class="form-group-modern">
                         <label class="form-label-modern">Destinataires</label>
-                        <select name="destinataires[]" multiple class="form-select-modern" required>
-                            <option value="all">Tous les organisateurs</option>
+                        <select name="destinataires[]" multiple class="form-select-modern" required size="10">
+                            <option value="all">✉️ Tous les organisateurs</option>
                             <?php foreach ($organisateurs as $org): ?>
                                 <option value="<?php echo $org['IdUtilisateur']; ?>" 
                                         <?php echo (isset($_POST['destinataires']) && in_array($org['IdUtilisateur'], $_POST['destinataires'])) ? 'selected' : ''; ?>>
@@ -306,12 +409,16 @@ try {
                     <div class="form-group-modern">
                         <label class="form-label-modern">Sujet</label>
                         <input type="text" name="sujet" class="form-input-modern" 
-                               value="<?php echo htmlspecialchars($sujet); ?>" required>
+                               value="<?php echo htmlspecialchars($sujet); ?>" 
+                               placeholder="Ex: Nouvelle réunion des organisateurs"
+                               required>
                     </div>
 
                     <div class="form-group-modern">
                         <label class="form-label-modern">Message</label>
-                        <textarea name="message" class="form-textarea-modern" rows="8" required><?php echo htmlspecialchars($message); ?></textarea>
+                        <textarea name="message" class="form-textarea-modern" rows="8" 
+                                  placeholder="Rédigez votre message ici..."
+                                  required><?php echo htmlspecialchars($message); ?></textarea>
                     </div>
 
                     <div class="form-actions-modern">
@@ -321,7 +428,7 @@ try {
                         </button>
                     </div>
                 </form>
-        </div>
+            </div>
 
             <!-- Historique des emails récents -->
             <?php if (!empty($emails_recents)): ?>

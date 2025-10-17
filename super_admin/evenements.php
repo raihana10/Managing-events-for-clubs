@@ -5,6 +5,12 @@
 
 require_once '../config/database.php';
 require_once '../config/session.php';
+require '../vendor/phpmailer/src/PHPMailer.php';
+require '../vendor/phpmailer/src/SMTP.php';
+require '../vendor/phpmailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 // Vérifier que c'est bien un super admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'administrateur') {
@@ -159,9 +165,10 @@ try {
                                 <th>Club</th>
                                 <th>Date & Heure</th>
                                 <th>Lieu</th>
+                                <th>Type de participants</th>
                                 <th>Participants</th>
                                 <th>Statut</th>
-                                <th>Actions</th>
+                                
                             </tr>
                         </thead>
                         <tbody>
@@ -191,6 +198,24 @@ try {
                                     </td>
                                     <td><?php echo htmlspecialchars($event['Lieu']); ?></td>
                                     <td>
+                                        <strong><?php echo htmlspecialchars(ucfirst($event['TypeParticipant'])); ?></strong><br>
+                                    <?php
+                                    $prix_adherent = $event['PrixAdherent'];
+                                    $prix_non_adherent = $event['PrixNonAdherent'];
+                                    $prix_externe = $event['PrixExterne'];
+                                        if ($event['TypeParticipant'] === 'Adhérents') {
+                                            echo 'Adhérents :' . ($prix_adherent > 0 ? ' ' . number_format($prix_adherent, 2) . ' DH' : ' Gratuit');
+                                        } elseif ($event['TypeParticipant'] === 'Ensatiens') {
+                                            echo 'Adhérents :' . ($prix_adherent > 0 ? ' ' . number_format($prix_adherent, 2) . ' DH' : ' Gratuit') . '<br>';
+                                            echo 'Non adhérents  :' . ($prix_non_adherent > 0 ? ' ' . number_format($prix_non_adherent, 2) . ' DH' : ' Gratuit');
+                                        } elseif ($event['TypeParticipant'] === 'Tous') {
+                                            echo 'Adhérents :' . ($prix_adherent > 0 ? ' ' . number_format($prix_adherent, 2) . ' DH' : ' Gratuit') . '<br>';
+                                            echo 'Non adhérents  :' . ($prix_non_adherent > 0 ? ' ' . number_format($prix_non_adherent, 2) . ' DH' : ' Gratuit') . '<br>';
+                                            echo 'Externes :' . ($prix_externe > 0 ? ' ' . number_format($prix_externe, 2) . ' DH' : ' Gratuit');
+                                        }
+                                    ?>
+                                    </td>
+                                    <td>
                                         <div class="capacity-info">
                                             <strong><?php echo $event['nb_inscrits']; ?>/<?php echo $event['CapaciteMax']; ?></strong>
                                             <div class="capacity-bar">
@@ -204,17 +229,17 @@ try {
                                         $status_class = '';
                                         $status_text = '';
                                         switch($event['Status']) {
-                                            case 'actif':
+                                            case 'validé':
                                                 $status_class = 'badge-success';
-                                                $status_text = 'Actif';
+                                                $status_text = 'Validé';
                                                 break;
-                                            case 'annule':
-                                                $status_class = 'badge-error';
-                                                $status_text = 'Annulé';
-                                                break;
-                                            case 'termine':
+                                            case 'en attente':
                                                 $status_class = 'badge-warning';
-                                                $status_text = 'Terminé';
+                                                $status_text = 'En attente';
+                                                break;
+                                            case 'refusé':
+                                                $status_class = 'badge-error';
+                                                $status_text = 'Refusé';
                                                 break;
                                             default:
                                                 $status_class = 'badge-info';
@@ -223,14 +248,7 @@ try {
                                         ?>
                                         <span class="badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span>
                                     </td>
-                                    <td>
-                                        <div class="flex gap-sm">
-                                            <a href="../admin_club/gerer_event.php?id=<?php echo $event['IdEvenement']; ?>" 
-                                               class="btn btn-outline btn-sm" title="Gérer">
-                                                Gérer
-                                            </a>
-                                        </div>
-                                    </td>
+                                
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

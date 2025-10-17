@@ -90,7 +90,7 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="header-modern">
+    <nav class="header-modern" >
         <div class="header-content">
             <a href="dashboard.php" class="logo-modern">🎓 Event Manager</a>
             <div class="user-section">
@@ -104,63 +104,14 @@ try {
         </div>
     </nav>
 
-    <aside class="sidebar-modern">
-        <nav class="sidebar-nav-modern">
-            <div class="sidebar-section-modern">
-                <div class="sidebar-title-modern">Administration</div>
-                <ul class="sidebar-nav-modern">
-                    <li class="sidebar-nav-item-modern">
-                        <a href="dashboard.php" class="sidebar-nav-link-modern">
-                            <div class="sidebar-nav-icon-modern">📊</div>
-                            Tableau de bord
-                        </a>
-                    </li>
-                    <li class="sidebar-nav-item-modern">
-                        <a href="gerer_clubs.php" class="sidebar-nav-link-modern">
-                            <div class="sidebar-nav-icon-modern">🏛️</div>
-                            Gérer les clubs
-                        </a>
-                    </li>
-                    <li class="sidebar-nav-item-modern">
-                        <a href="liste_admins.php" class="sidebar-nav-link-modern">
-                            <div class="sidebar-nav-icon-modern">👥</div>
-                            Admins des clubs
-                        </a>
-                    </li>
-                    <li class="sidebar-nav-item-modern">
-                        <a href="evenements.php" class="sidebar-nav-link-modern">
-                            <div class="sidebar-nav-icon-modern">📅</div>
-                            Les événements
-                        </a>
-                    </li>
-                    <li class="sidebar-nav-item-modern">
-                        <a href="utilisateurs.php" class="sidebar-nav-link-modern active">
-                            <div class="sidebar-nav-icon-modern">👤</div>
-                            Les utilisateurs
-                        </a>
-                    </li>
-                    <li class="sidebar-nav-item-modern">
-                        <a href="emails.php" class="sidebar-nav-link-modern">
-                            <div class="sidebar-nav-icon-modern">📧</div>
-                            Envoyer un email
-                        </a>
-                    </li>
-                    <li class="sidebar-nav-item-modern">
-                        <a href="validations.php" class="sidebar-nav-link-modern">
-                            <div class="sidebar-nav-icon-modern">✅</div>
-                            Validations
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    </aside>
+    
 
-    <div class="layout">
-        <main class="main-content">
+    <div class="layout" style="margin-left: 0;">
+        <main class="main-content" style="margin-left: 0; padding: var(--space-xl);">
             <div class="page-title">
                 <h1>Gestion des utilisateurs</h1>
-                <p>Gérez tous les utilisateurs de la plateforme</p>
+                <a href="dashboard.php" class="btn btn-secondary"> Retour au dashboard</a>
+                
             </div>
 
             <?php if (isset($success_message)): ?>
@@ -238,10 +189,10 @@ try {
                                             <td><?php echo date('d/m/Y', strtotime($user['DateInscription'])); ?></td>
                                             <td>
                                                 <div class="flex gap-sm">
-                                                    <a href="mailto:<?php echo htmlspecialchars($user['Email']); ?>" class="btn btn-outline btn-sm">
-                                                        <span class="btn-icon">📧</span>
-                                                        Contact
-                                                    </a>
+                                        <button class="btn btn-outline btn-sm" title="Supprimer" 
+                                                            onclick="confirmDelete(<?php echo $user['IdUtilisateur']; ?>, '<?php echo htmlspecialchars($user['Prenom'] . ' ' . $user['Nom']); ?>')">
+                                                        Supprimer
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -260,5 +211,13 @@ try {
             <?php endif; ?>
         </main>
     </div>
+    <script>
+        function confirmDelete(adminId, adminName) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer l'administrateur "${adminName}" ?\n\nCette action est irréversible.`)) {
+                document.getElementById('deleteAdminId').value = adminId;
+                document.getElementById('deleteForm').submit();
+            }
+        }
+    </script>
 </body>
 </html>

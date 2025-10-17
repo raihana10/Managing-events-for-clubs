@@ -5,6 +5,124 @@
 
 require_once '../config/database.php';
 require_once '../config/session.php';
+require '../vendor/phpmailer/src/PHPMailer.php';
+require '../vendor/phpmailer/src/SMTP.php';
+require '../vendor/phpmailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Fonction pour envoyer un email via PHPMailer
+function envoyerEmailNouvelAdmin($destinataire_email, $destinataire_nom, $mot_de_passe) {
+    $mail = new PHPMailer(true);
+    
+    try {
+        // Configuration SMTP
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'mohito.raihana@gmail.com';
+        $mail->Password = 'pqie uzik iuym wsgl';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+        
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+        
+        $mail->SMTPAutoTLS = false;
+        $mail->Timeout = 30;
+        $mail->SMTPDebug = 0;
+        $mail->CharSet = 'UTF-8';
+
+        // Expéditeur et destinataire
+        $mail->setFrom('mohito.raihana@gmail.com', 'Event Manager - Administration');
+        $mail->addAddress($destinataire_email, $destinataire_nom);
+        
+        // Contenu de l'email
+        $mail->isHTML(true);
+        $mail->Subject = "Bienvenue sur Event Manager - Votre compte organisateur";
+        
+        $mail->Body = '
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1 style="color: white; margin: 0;">🎓 Event Manager</h1>
+                    <p style="color: #f0f0f0; margin: 5px 0 0 0;">Gestion des événements de clubs</p>
+                </div>
+                
+                <div style="background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px;">
+                    <h2 style="color: #333; margin-top: 0;">Bienvenue ' . htmlspecialchars($destinataire_nom) . ' ! 🎉</h2>
+                    
+                    <p style="font-size: 16px; line-height: 1.6; color: #555;">
+                        Votre compte <strong>organisateur de club</strong> a été créé avec succès sur Event Manager !
+                    </p>
+                    
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                        <h3 style="color: #856404; margin-top: 0;">🔐 Vos identifiants de connexion</h3>
+                        <p style="margin: 10px 0;"><strong>Email :</strong> ' . htmlspecialchars($destinataire_email) . '</p>
+                        <p style="margin: 10px 0;"><strong>Mot de passe temporaire :</strong></p>
+                        <div style="background: #fff; padding: 15px; border-radius: 5px; text-align: center; margin: 10px 0;">
+                            <code style="font-size: 20px; font-weight: bold; color: #d9534f; letter-spacing: 2px;">' . htmlspecialchars($mot_de_passe) . '</code>
+                        </div>
+                        <p style="color: #856404; margin: 10px 0;">⚠️ <strong>Important :</strong> Veuillez changer votre mot de passe lors de votre première connexion pour des raisons de sécurité.</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="color: #2c3e50; margin-top: 0;">📋 Vos privilèges en tant qu\'organisateur :</h3>
+                        <ul style="color: #555; line-height: 1.8;">
+                            <li>✅ Créer et gérer vos événements de club</li>
+                            <li>📅 Planifier des réunions et activités</li>
+                            <li>👥 Gérer les inscriptions des participants</li>
+                            <li>📊 Consulter les statistiques de vos événements</li>
+                            <li>📧 Communiquer avec vos membres</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="https://votre-site.com/auth/login.php" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+                            🚀 Se connecter maintenant
+                        </a>
+                    </div>
+                    
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2196F3;">
+                        <p style="margin: 0; color: #0d47a1;">
+                            <strong>💡 Conseil :</strong> Pensez à enregistrer ces identifiants en lieu sûr et à modifier votre mot de passe dès votre première connexion.
+                        </p>
+                    </div>
+                    
+                    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+                    
+                    <p style="color: #666; font-size: 14px; margin: 0;">
+                        Si vous avez des questions, n\'hésitez pas à contacter l\'équipe administrative.<br><br>
+                        Cordialement,<br>
+                        <strong>L\'équipe Event Manager</strong>
+                    </p>
+                    
+                    <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                        📅 Email envoyé le ' . date('d/m/Y à H:i') . '
+                    </p>
+                </div>
+            </div>
+        ';
+        
+        $mail->AltBody = "Bienvenue sur Event Manager !\n\n" .
+                        "Votre compte organisateur a été créé.\n\n" .
+                        "Identifiants de connexion:\n" .
+                        "Email: $destinataire_email\n" .
+                        "Mot de passe temporaire: $mot_de_passe\n\n" .
+                        "Veuillez changer votre mot de passe lors de votre première connexion.";
+
+        $mail->send();
+        return ['success' => true, 'message' => 'Email envoyé avec succès'];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Erreur : ' . $mail->ErrorInfo];
+    }
+}
 
 // Vérifier que c'est bien un super admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'administrateur') {
@@ -22,6 +140,8 @@ $conn = $database->getConnection();
 $nom = $prenom = $email = $telephone = '';
 $errors = [];
 $success = false;
+$mot_de_passe_temporaire = '';
+$email_envoye = false;
 
 // Traitement du formulaire lorsqu'il est soumis
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -76,6 +196,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Si aucune erreur, insérer dans la base de données
     if (empty($errors)) {
         try {
+            $conn->beginTransaction();
+            
             // Générer un mot de passe temporaire
             $mot_de_passe_temporaire = bin2hex(random_bytes(8));
             $mot_de_passe_hash = password_hash($mot_de_passe_temporaire, PASSWORD_DEFAULT);
@@ -92,19 +214,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             if ($stmt->execute()) {
                 $admin_id = $conn->lastInsertId();
+                
+                // 🔥 ENVOI RÉEL DE L'EMAIL avec les identifiants
+                $nom_complet = $prenom . ' ' . $nom;
+                $resultat = envoyerEmailNouvelAdmin($email, $nom_complet, $mot_de_passe_temporaire);
+                
+                if ($resultat['success']) {
+                    // Enregistrer dans la BDD seulement si envoyé
+                    $objet = "Bienvenue sur Event Manager - Votre compte organisateur";
+                    $contenu = "Bonjour $nom_complet,\n\n";
+                    $contenu .= "Votre compte organisateur a été créé avec succès.\n\n";
+                    $contenu .= "Identifiants:\nEmail: $email\nMot de passe: $mot_de_passe_temporaire\n\n";
+                    $contenu .= "Veuillez changer votre mot de passe lors de votre première connexion.";
+                    
+                    $sql_email = "INSERT INTO EmailAdmin (IdAdmin, DestinataireEmail, DestinataireNom, Objet, Contenu, TypeEmail, DateEnvoi) 
+                                VALUES (:id_admin, :destinataire_email, :destinataire_nom, :objet, :contenu, 'creation_organisateur', NOW())";
+
+                    $stmt_email = $conn->prepare($sql_email);
+                    $id_admin_session = $_SESSION['user_id'];
+                    $stmt_email->bindParam(':id_admin', $id_admin_session);
+                    $stmt_email->bindParam(':destinataire_email', $email);
+                    $stmt_email->bindParam(':destinataire_nom', $nom_complet);
+                    $stmt_email->bindParam(':objet', $objet);
+                    $stmt_email->bindParam(':contenu', $contenu);
+                    $stmt_email->execute();
+                    
+                    $email_envoye = true;
+                }
+                
+                $conn->commit();
                 $success = true;
                 
-                // Optionnel : Envoyer un email avec les identifiants
-                // Ici vous pourriez ajouter l'envoi d'email avec les identifiants
-                
-                // Réinitialiser le formulaire
-                $nom = $prenom = $email = $telephone = '';
+                // Réinitialiser le formulaire uniquement si tout est OK
+                if ($email_envoye) {
+                    // On garde $mot_de_passe_temporaire pour l'afficher
+                    $nom = $prenom = $email = $telephone = '';
+                }
             } else {
-                $errors['general'] = "Erreur lors de la création de l'administrateur.";
+                throw new Exception("Erreur lors de la création de l'administrateur.");
             }
             
-        } catch (PDOException $e) {
-            $errors['general'] = "Erreur de base de données : " . $e->getMessage();
+        } catch (Exception $e) {
+            $conn->rollBack();
+            $errors['general'] = "Erreur : " . $e->getMessage();
         }
     }
 }
@@ -205,8 +357,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="alert-content-modern">
                         <div class="alert-title-modern">Succès</div>
                         <div class="alert-message-modern">
-                            Administrateur créé avec succès !<br>
-                            <strong>Mot de passe temporaire :</strong> <?php echo htmlspecialchars($mot_de_passe_temporaire ?? ''); ?>
+                            <strong>Administrateur créé avec succès !</strong><br><br>
+                            <?php if ($email_envoye): ?>
+                                ✉️ Un email contenant les identifiants a été envoyé à l'organisateur.<br><br>
+                            <?php endif; ?>
+                            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #ffc107;">
+                                <strong>🔐 Mot de passe temporaire :</strong><br>
+                                <code style="font-size: 18px; font-weight: bold; color: #d9534f; background: white; padding: 8px 15px; border-radius: 5px; display: inline-block; margin-top: 8px;">
+                                    <?php echo htmlspecialchars($mot_de_passe_temporaire); ?>
+                                </code>
+                                <p style="margin: 10px 0 0 0; font-size: 14px; color: #856404;">
+                                    ⚠️ Notez ce mot de passe, il ne sera plus affiché après actualisation de la page.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -229,7 +392,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="form-group-modern">
                             <label class="form-label-modern">Nom *</label>
                             <input type="text" name="nom" class="form-input-modern" 
-                                   value="<?php echo htmlspecialchars($nom); ?>" required>
+                                   value="<?php echo htmlspecialchars($nom); ?>" 
+                                   placeholder="Nom de famille"
+                                   required>
                             <?php if (isset($errors['nom'])): ?>
                                 <div class="form-error-modern"><?php echo htmlspecialchars($errors['nom']); ?></div>
                             <?php endif; ?>
@@ -238,7 +403,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="form-group-modern">
                             <label class="form-label-modern">Prénom *</label>
                             <input type="text" name="prenom" class="form-input-modern" 
-                                   value="<?php echo htmlspecialchars($prenom); ?>" required>
+                                   value="<?php echo htmlspecialchars($prenom); ?>" 
+                                   placeholder="Prénom"
+                                   required>
                             <?php if (isset($errors['prenom'])): ?>
                                 <div class="form-error-modern"><?php echo htmlspecialchars($errors['prenom']); ?></div>
                             <?php endif; ?>
@@ -248,7 +415,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="form-group-modern">
                         <label class="form-label-modern">Email *</label>
                         <input type="email" name="email" class="form-input-modern" 
-                               value="<?php echo htmlspecialchars($email); ?>" required>
+                               value="<?php echo htmlspecialchars($email); ?>" 
+                               placeholder="email@exemple.com"
+                               required>
                         <?php if (isset($errors['email'])): ?>
                             <div class="form-error-modern"><?php echo htmlspecialchars($errors['email']); ?></div>
                         <?php endif; ?>
@@ -257,21 +426,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="form-group-modern">
                         <label class="form-label-modern">Téléphone</label>
                         <input type="tel" name="telephone" class="form-input-modern" 
-                               value="<?php echo htmlspecialchars($telephone); ?>">
+                               value="<?php echo htmlspecialchars($telephone); ?>"
+                               placeholder="06 12 34 56 78">
                         <?php if (isset($errors['telephone'])): ?>
                             <div class="form-error-modern"><?php echo htmlspecialchars($errors['telephone']); ?></div>
                         <?php endif; ?>
                     </div>
 
-                    <div class="info-box">
-                        <div class="info-icon">ℹ️</div>
-                        <div class="info-content">
-                            <strong>Informations importantes :</strong>
-                            <ul>
-                                <li>Un mot de passe temporaire sera généré automatiquement</li>
-                                <li>L'administrateur recevra ses identifiants par email</li>
-                                <li>Il pourra modifier son mot de passe lors de sa première connexion</li>
-                            </ul>
+                    <div class="info-box" style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <div style="display: flex; align-items: start; gap: 10px;">
+                            <div style="font-size: 24px;">ℹ️</div>
+                            <div>
+                                <strong style="color: #0d47a1;">Informations importantes :</strong>
+                                <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #555;">
+                                    <li>Un mot de passe temporaire sera généré automatiquement</li>
+                                    <li>📧 L'organisateur recevra ses identifiants par email</li>
+                                    <li>🔒 Il devra modifier son mot de passe lors de sa première connexion</li>
+                                    <li>Le rôle "organisateur" lui permettra de gérer les événements de ses clubs</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -288,5 +461,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </main>
     </div>
+
+    <script>
+        // Auto-hide success message after 30 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const successAlert = document.querySelector('.alert-success-modern');
+            if (successAlert) {
+                setTimeout(() => {
+                    successAlert.style.transition = 'opacity 0.5s ease';
+                    successAlert.style.opacity = '0';
+                    setTimeout(() => successAlert.remove(), 500);
+                }, 30000);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -186,7 +186,7 @@ $is_updated = isset($_GET['updated']);
                 
                 <div class="club-header-modern" style="margin-bottom: var(--space-xl);">
                     <?php if (!empty($club_data['Logo'])): ?>
-                        <img src="../<?php echo htmlspecialchars($club_data['Logo']); ?>" 
+                        <img src="../uploads/clubs/<?php echo htmlspecialchars($club_data['Logo']); ?>" 
                              alt="Logo" class="club-logo-modern" style="width: 120px; height: 120px; border-radius: var(--radius-lg); margin-bottom: var(--space-md);">
                     <?php endif; ?>
                     <div>

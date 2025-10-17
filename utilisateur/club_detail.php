@@ -3,6 +3,8 @@
 require_once '../config/database.php';
 require_once '../config/session.php';
 
+$currentPage = 'club_detail.php';
+
 requireLogin();
 requireRole(['participant']);
 
@@ -62,47 +64,102 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Détails du Club - <?php echo htmlspecialchars($club['NomClub'] ?? 'Club Inconnu'); ?></title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <?php include '_sidebar.php'; ?>
     <?php include '_navbar.php'; ?>
-
-    <div style="max-width: 1200px; margin: 20px auto; padding: 0 15px;">
+    
+    <!-- Contenu principal avec padding pour éviter la sidebar -->
+    <div style="padding: 20px;">
         <?php if ($club): ?>
-            <div style="background-color: white; padding: 30px; border-radius: 8px;">
-                <!-- ... (Infos du club, inchangées) ... -->
+            <div class="page-title">
                 <h1><?php echo htmlspecialchars($club['NomClub']); ?></h1>
                 <?php if ($is_member): ?>
-                    <p style="background-color: #d4edda; color: #155724; padding: 5px 10px; border-radius: 5px; display: inline-block;">✓ Vous êtes membre de ce club</p>
+                    <div class="alert-modern alert-success-modern" style="margin-top: 10px;">
+                        ✓ Vous êtes membre de ce club
+                    </div>
                 <?php endif; ?>
-                <!-- ... (Reste des infos du club) ... -->
             </div>
 
-            <div style="margin-top: 30px;">
-                <h2>Événements de <?php echo htmlspecialchars($club['NomClub']); ?></h2>
-                <?php if (!empty($evenements_club)): ?>
-                    <?php foreach ($evenements_club as $event): ?>
-                    <div style="background-color: white; border: 1px solid #eee; padding: 15px; margin-bottom: 10px;">
-                        <h3><?php echo htmlspecialchars($event['NomEvenement']); ?></h3>
-                        <p>
-                            <!-- ... (Détails de l'événement) ... -->
-                            <!-- NOUVEAU : Afficher un badge pour les événements réservés -->
-                            <?php if ($event['TypeParticipant'] == 'Adhérents'): ?>
-                                <span style="background-color: #ffc107; color: black; padding: 3px 8px; border-radius: 10px; font-size: 0.8em;">Réservé aux adhérents</span>
-                            <?php elseif ($event['TypeParticipant'] == 'Tous les étudiants'): ?>
-                                <span style="background-color: #cfe2ff; color: #055160; padding: 3px 8px; border-radius: 10px; font-size: 0.8em;">Ouvert à tous les étudiants</span>
-                            <?php else: ?>
-                                <span style="background-color: #cfe2ff; color: #055160; padding: 3px 8px; border-radius: 10px; font-size: 0.8em;">Ouvert à tous</span>
-                            <?php endif; ?>
-                        </p>
-                        <a href="inscription_evenement.php?id=<?php echo (int)$event['IdEvenement']; ?>">Voir détails</a>
+            <div class="card">
+                <div class="card-body">
+                    <h2>À propos du club</h2>
+                    <p><?php echo htmlspecialchars($club['Description'] ?? 'Aucune description disponible.'); ?></p>
+                    
+                    <div class="grid grid-cols-2 gap-lg" style="margin-top: 20px;">
+                        <div>
+                            <strong>Administrateur :</strong><br>
+                            <?php echo htmlspecialchars($club['AdminPrenom'] . ' ' . $club['AdminNom']); ?>
+                        </div>
+                        <div>
+                            <strong>Date de création :</strong><br>
+                            <?php echo date('d/m/Y', strtotime($club['DateCreation'])); ?>
+                        </div>
                     </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>Aucun événement disponible pour vous dans ce club pour le moment.</p>
-                <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 30px;">
+                <div class="card-header">
+                    <h2>Événements de <?php echo htmlspecialchars($club['NomClub']); ?></h2>
+                </div>
+                <div class="card-body">
+                    <?php if (!empty($evenements_club)): ?>
+                        <div class="events-grid-modern">
+                            <?php foreach ($evenements_club as $event): ?>
+                            <div class="event-card-modern">
+                                <div class="event-content-modern">
+                                    <h3 class="event-title-modern"><?php echo htmlspecialchars($event['NomEvenement']); ?></h3>
+                                    
+                                    <div class="event-meta-modern">
+                                        <div class="event-meta-item-modern">
+                                            <span class="event-meta-icon-modern">📅</span>
+                                            <?php echo date('d/m/Y', strtotime($event['Date'])); ?>
+                                        </div>
+                                        <?php if (!empty($event['Lieu'])): ?>
+                                        <div class="event-meta-item-modern">
+                                            <span class="event-meta-icon-modern">📍</span>
+                                            <?php echo htmlspecialchars($event['Lieu']); ?>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 15px;">
+                                        <?php if ($event['TypeParticipant'] == 'Adhérents'): ?>
+                                            <span class="badge badge-warning">Réservé aux adhérents</span>
+                                        <?php elseif ($event['TypeParticipant'] == 'Tous les étudiants'): ?>
+                                            <span class="badge badge-info">Ouvert à tous les étudiants</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-info">Ouvert à tous</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div class="event-actions-modern">
+                                        <a href="inscription_evenement.php?id=<?php echo (int)$event['IdEvenement']; ?>" class="btn btn-primary btn-sm">Voir détails</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="empty-state-modern">
+                            <div class="empty-state-icon-modern">📅</div>
+                            <h3>Aucun événement disponible</h3>
+                            <p>Aucun événement disponible pour vous dans ce club pour le moment.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
+    </div>
+    
+    <!-- Fermer la div de contenu principal -->
     </div>
 </body>
 </html>

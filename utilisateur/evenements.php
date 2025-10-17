@@ -1,5 +1,6 @@
 <?php
 // utilisateur/evenements.php
+$currentPage = 'evenements';
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -41,28 +42,11 @@ $all_events = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header-modern">
-        <div class="header-content">
-            <a href="dashboard.php" class="logo-modern">Event Manager</a>
-            <nav class="nav-main">
-                <a href="dashboard.php" class="nav-link-modern">Accueil</a>
-                <a href="clubs.php" class="nav-link-modern">Clubs</a>
-                <a href="evenements.php" class="nav-link-modern active">Événements</a>
-                <a href="mes_inscriptions.php" class="nav-link-modern">Mes inscriptions</a>
-            </nav>
-            <div class="user-section">
-                <div class="user-info">
-                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
-                    <div class="user-role">Participant</div>
-                </div>
-                <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
-                <div class="user-avatar-modern"><?php echo $initials; ?></div>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='../auth/logout.php'">Déconnexion</button>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
+    <?php include '_sidebar.php'; ?>
+    <?php include '_navbar.php'; ?>
+    
+    <!-- Contenu principal avec padding pour éviter la sidebar -->
+    <div style="padding: 20px;">
         <div class="page-title">
             <h1>Tous les événements disponibles</h1>
             <p>Découvrez tous les événements auxquels vous pouvez participer</p>
@@ -162,6 +146,9 @@ $all_events = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             <?php endif; ?>
         </div>
+    </div>
+    
+    <!-- Fermer la div de contenu principal -->
     </div>
 
     <script src="../assets/js/main.js"></script>

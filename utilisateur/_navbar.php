@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 ?>
-<nav style="background-color: #f8f9fa; padding: 10px 20px; border-bottom: 1px solid #e2e6ea; display: flex; justify-content: space-between; align-items: center;">
+<nav style="display: none !important;">
     <div style="font-size: 1.5em; font-weight: bold;">GestionEvents</div>
     <div style="display: flex; gap: 15px;">
         <a href="dashboard.php" style="color: #007bff; text-decoration: none;">Accueil</a>

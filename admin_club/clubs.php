@@ -3,10 +3,8 @@
 require_once '../config/database.php';
 require_once '../config/session.php';
 
-$currentPage = 'tous-les-clubs';
-
 requireLogin(); // Redirige si l'utilisateur n'est pas connecté
-requireRole(['participant']); // S'assure que seul un participant peut accéder
+requireRole(['organisateur']); // S'assure que seul un organisateur peut accéder
 
 $database = new Database();
 $db = $database->getConnection();
@@ -14,10 +12,8 @@ $db = $database->getConnection();
 $message = '';
 $message_type = '';
 
-// Récupérer la liste de tous les clubs avec leurs statistiques réelles
-$query = "SELECT c.IdClub, c.NomClub, c.Description, c.Logo, u.Nom as AdminNom, u.Prenom as AdminPrenom,
-          (SELECT COUNT(*) FROM Adhesion a WHERE a.IdClub = c.IdClub AND a.Status = 'actif') as nb_membres,
-          (SELECT COUNT(*) FROM Evenement e WHERE e.IdClub = c.IdClub AND e.Etat = 'valide' AND e.Date >= CURDATE()) as nb_evenements
+// Récupérer la liste de tous les clubs
+$query = "SELECT c.IdClub, c.NomClub, c.Description, c.Logo, u.Nom as AdminNom, u.Prenom as AdminPrenom 
           FROM Club c 
           JOIN Utilisateur u ON c.IdAdminClub = u.IdUtilisateur 
           ORDER BY c.NomClub ASC";
@@ -45,14 +41,31 @@ if (isset($_SESSION['message'])) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <?php include '_sidebar.php'; ?>
-    <?php include '_navbar.php'; ?>
-    
-    <!-- Contenu principal avec padding pour éviter la sidebar -->
-    <div style="padding: 20px;">
+    <header class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">Event Manager</a>
+            <nav class="nav-main">
+                <a href="dashboard.php" class="nav-link-modern">Accueil</a>
+                <a href="clubs.php" class="nav-link-modern active">Clubs</a>
+                <a href="evenements.php" class="nav-link-modern">Événements</a>
+                <a href="mes_inscriptions.php" class="nav-link-modern">Mes inscriptions</a>
+            </nav>
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                    <div class="user-role">Participant</div>
+                </div>
+                <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
+                <div class="user-avatar-modern"><?php echo $initials; ?></div>
+                <button class="btn btn-ghost btn-sm" onclick="window.location.href='../auth/logout.php'">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
         <div class="page-title">
-            <h1>Tous les Clubs de l'Ecole</h1>
-            <p>Explorez la liste complète des clubs, rejoignez leurs communautés et participez à leurs événements.</p>
+            <h1>Nos Clubs</h1>
+            <p>Découvrez tous les clubs disponibles sur la plateforme</p>
         </div>
 
         <?php if ($message): ?>
@@ -80,7 +93,7 @@ if (isset($_SESSION['message'])) {
                     
                     <div class="club-name-modern"><?php echo htmlspecialchars($club['NomClub']); ?></div>
                     <div class="club-description-modern">
-                        <?php echo htmlspecialchars(mb_strimwidth($club['description'] ?? 'Aucune description fournie.', 0, 120, '...')); ?>
+                        <?php echo htmlspecialchars(mb_strimwidth($club['Description'] ?? 'Aucune description fournie.', 0, 120, '...')); ?>
                     </div>
                     
                     <div class="club-admin-modern">
@@ -90,11 +103,11 @@ if (isset($_SESSION['message'])) {
                     
                     <div class="club-stats-modern">
                         <div class="club-stat-modern">
-                            <div class="club-stat-value-modern"><?php echo (int)$club['nb_membres']; ?></div>
+                            <div class="club-stat-value-modern">12</div>
                             <div class="club-stat-label-modern">Membres</div>
                         </div>
                         <div class="club-stat-modern">
-                            <div class="club-stat-value-modern"><?php echo (int)$club['nb_evenements']; ?></div>
+                            <div class="club-stat-value-modern">5</div>
                             <div class="club-stat-label-modern">Événements</div>
                         </div>
                     </div>
@@ -107,14 +120,11 @@ if (isset($_SESSION['message'])) {
             <?php else: ?>
                 <div class="empty-state-modern">
                     <div class="empty-state-icon-modern">🏛️</div>
-                    <h3>Aucun club n'est disponible sur la plateforme pour le moment.</h3>
+                    <h3>Aucun club disponible</h3>
                     <p>Revenez bientôt pour découvrir les nouveaux clubs.</p>
                 </div>
             <?php endif; ?>
         </div>
-    </div>
-    
-    <!-- Fermer la div de contenu principal -->
     </div>
 
     <script src="../assets/js/main.js"></script>

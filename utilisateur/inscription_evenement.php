@@ -9,6 +9,7 @@ error_reporting(E_ALL);
 require_once '../config/database.php';
 require_once '../config/session.php';
 
+$currentPage = 'inscription_evenement.php';
 requireLogin();
 requireRole(['participant']);
 
@@ -36,6 +37,27 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $event = $stmt_event->fetch(PDO::FETCH_ASSOC);
 
     if ($event) {
+
+        $places_restantes = null; // On initialise la variable
+
+        // On ne fait le calcul que si une capacité maximale est définie pour l'événement
+        if (!empty($event['CapaciteMax'])) {
+            // 1. On compte combien de personnes sont déjà inscrites
+            $query_count_participants = "SELECT COUNT(IdInscription) FROM Inscription WHERE IdEvenement = :id_evenement";
+            $stmt_count = $db->prepare($query_count_participants);
+            $stmt_count->bindParam(':id_evenement', $id_evenement);
+            $stmt_count->execute();
+            $current_participants = $stmt_count->fetchColumn();
+
+            // 2. On calcule les places restantes
+            $places_restantes = $event['CapaciteMax'] - $current_participants;
+        }
+        // --- FIN DU BLOC À AJOUTER ---
+
+        // Vérifier si l'utilisateur est déjà inscrit à cet événement
+        $query_check_inscription = "SELECT IdInscription FROM Inscription ...";
+
+
         // Déterminer le prix selon le type d'utilisateur
         $query_membership = "SELECT COUNT(*) FROM Adhesion WHERE IdParticipant = :user_id AND IdClub = :club_id AND Status = 'actif'";
         $stmt_membership = $db->prepare($query_membership);
@@ -144,73 +166,94 @@ if (isset($_SESSION['message']) && empty($message)) { // Si un message de sessio
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails de l'événement - <?php echo htmlspecialchars($event['NomEvenement'] ?? 'Événement Inconnu'); ?></title>
-    <!-- Votre CSS sera inclus ici -->
+    <title>Détails de l'événement - <?php echo htmlspecialchars($event['NomEvenement'] ?? 'Événement'); ?></title>
+    <!-- LIENS VERS VOS FICHIERS CSS MODERNES -->
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <?php include '_navbar.php'; ?>
-
-    <div style="max-width: 1200px; margin: 20px auto; padding: 0 15px;">
+    <?php include '_sidebar.php'; ?>
+    
+    <!-- Contenu principal avec padding pour éviter la sidebar -->
+    <div style="padding: 20px;">
         <?php if ($message): ?>
-            <div class="alert alert-<?php echo $message_type; ?>" style="padding: 10px; margin-bottom: 15px; border-radius: 5px; <?php echo $message_type === 'success' ? 'background-color: #d4edda; color: #155724;' : ($message_type === 'info' ? 'background-color: #cfe2ff; color: #055160;' : 'background-color: #f8d7da; color: #721c24;'); ?>"><?php echo $message; ?></div>
+            <div class="alert-modern alert-<?php echo $message_type === 'success' ? 'success' : 'error'; ?>-modern">
+                <?php echo htmlspecialchars($message); ?>
+            </div>
         <?php endif; ?>
 
         <?php if ($event): ?>
-            <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px;">
-                <h1 style="font-size: 2.2em; margin-bottom: 10px;"><?php echo htmlspecialchars($event['NomEvenement']); ?></h1>
-                <p style="color: #666; margin-bottom: 15px;">Organisé par : <a href="club_detail.php?id=<?php echo (int)$event['IdClub']; ?>" style="color: #007bff; text-decoration: none;"><?php echo htmlspecialchars($event['NomClub']); ?></a></p>
-                
-                <?php 
-                $affiche_path = !empty($event['Affiche']) && file_exists('../assets/images/evenements/' . $event['Affiche']) 
-                              ? '../assets/images/evenements/' . $event['Affiche'] 
-                              : 'https://via.placeholder.com/600x400?text=Affiche+Evenement';
-                ?>
-                <img src="<?php echo htmlspecialchars($affiche_path); ?>" alt="Affiche de l'événement" style="max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 20px;">
+            <div class="card">
+                <div class="card-body">
+                    <div class="page-title" style="text-align: left; margin-bottom: 2rem;">
+                        <h1><?php echo htmlspecialchars($event['NomEvenement']); ?></h1>
+                        <p>Organisé par : <a href="club_detail.php?id=<?php echo (int)$event['IdClub']; ?>"><?php echo htmlspecialchars($event['NomClub']); ?></a></p>
+                    </div>
 
-                <p style="font-size: 1.1em; color: #333; margin-bottom: 20px;"><?php echo nl2br(htmlspecialchars($event['Description'] ?? 'Aucune description disponible pour cet événement.')); ?></p>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 0.95em; color: #555;">
-                    <p><strong>Date :</strong> <?php echo date('d F Y', strtotime($event['Date'])); ?></p>
-                    <p><strong>Heure :</strong> <?php echo htmlspecialchars(substr($event['HeureDebut'], 0, 5) . ' - ' . substr($event['HeureFin'], 0, 5)); ?></p>
-                    <p><strong>Lieu :</strong> <?php echo htmlspecialchars($event['Lieu']); ?></p>
-                    <p><strong>Type de participant :</strong> <?php echo htmlspecialchars($event['TypeParticipant']); ?></p>
-                    <p><strong>Prix (<?php echo $user_type; ?>) :</strong> 
-                        <?php if ($event_price == 0 || $event_price === null): ?>
-                            <span style="color: #28a745; font-weight: bold;">Gratuit</span>
-                        <?php else: ?>
-                            <span style="color: #007bff; font-weight: bold;"><?php echo number_format(floatval($event_price), 2); ?> €</span>
-                        <?php endif; ?>
-                    </p>
-                    <?php if (!empty($event['CapaciteMax'])): ?>
-                        <?php
-                            $query_count_participants = "SELECT COUNT(IdInscription) as count FROM Inscription WHERE IdEvenement = :id_evenement";
-                            $stmt_count = $db->prepare($query_count_participants);
-                            $stmt_count->bindParam(':id_evenement', $id_evenement);
-                            $stmt_count->execute();
-                            $current_participants = $stmt_count->fetchColumn();
-                            $places_restantes = $event['CapaciteMax'] - $current_participants;
-                        ?>
-                    <p><strong>Capacité :</strong> <?php echo (int)$event['CapaciteMax']; ?> (<?php echo $places_restantes > 0 ? $places_restantes : '0'; ?> places restantes)</p>
+                    <?php 
+                    $upload_directory = '../uploads/affiches/';
+                    if (!empty($event['Affiche']) && file_exists($upload_directory . $event['Affiche'])) {
+                        $affiche_path = $upload_directory . htmlspecialchars($event['Affiche']);
+                    } else {
+                        $affiche_path = 'https://via.placeholder.com/800x400/ff6b6b/ffffff?text=Affiche+de+l\'Evenement';
+                    }
+                    ?>
+                    
+                    <?php if (!empty($event['Affiche'])): ?>
+                        <div style="margin-bottom: 2rem;">
+                            <img src="<?php echo $affiche_path; ?>" alt="Affiche de l'événement" style="width: 100%; max-width: 600px; height: auto; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-md);">
+                        </div>
+                    <?php else: ?>
+                        <div style="margin-bottom: 2rem; text-align: center; padding: 2rem; background: var(--neutral-100); border-radius: var(--border-radius-lg); border: 2px dashed var(--neutral-300);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--neutral-400);">📅</div>
+                            <p style="color: var(--neutral-500); margin: 0;">Aucune affiche disponible pour cet événement</p>
+                        </div>
                     <?php endif; ?>
-                </div>
 
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
-                   <form method="POST" action="inscription_evenement.php?id=<?php echo (int)$id_evenement; ?>">
-    <input type="hidden" name="action" value="inscrire">
-    <button type="submit">S'inscrire à cet événement</button>
-</form>
-<p>Info: Déjà inscrit ? <?php echo $already_registered ? 'Oui' : 'Non'; ?></p>
-<p>Info: Places restantes: <?php echo isset($places_restantes) ? $places_restantes : 'N/A'; ?></p> 
-                </div>
+                    <div style="background: var(--neutral-50); padding: 1.5rem; border-radius: var(--border-radius-lg); margin-bottom: 2rem; border-left: 4px solid var(--primary-coral);">
+                        <h3 style="margin: 0 0 1rem 0; color: var(--neutral-800); font-size: 1.2rem;">Description de l'événement</h3>
+                        <?php if (!empty($event['description'])): ?>
+                            <p style="font-size: 1.1em; line-height: 1.6; margin: 0; color: var(--neutral-700);"><?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+                        <?php else: ?>
+                            <p style="font-size: 1.1em; color: var(--neutral-500); margin: 0; font-style: italic;">Aucune description disponible pour cet événement.</p>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-lg" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--neutral-200);">
+                        <p><strong>Date :</strong> <?php echo date('d F Y', strtotime($event['Date'])); ?></p>
+                        <p><strong>Heure :</strong> <?php echo htmlspecialchars(substr($event['HeureDebut'], 0, 5) . ' - ' . substr($event['HeureFin'], 0, 5)); ?></p>
+                        <p><strong>Lieu :</strong> <?php echo htmlspecialchars($event['Lieu']); ?></p>
+                         <?php if ($places_restantes !== null): ?>
+        <p>
+            <strong>Capacité :</strong> <?php echo (int)$event['CapaciteMax']; ?>
+            (<strong><?php echo max(0, $places_restantes); ?></strong> places restantes)
+        </p>
+    <?php endif; ?>
+                    </div>
 
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <?php if ($already_registered): ?>
+                            <button class="btn btn-secondary" disabled>Vous êtes déjà inscrit</button>
+                        <?php else: ?>
+                            <form method="POST" action="inscription_evenement.php?id=<?php echo (int)$id_evenement; ?>">
+                                <input type="hidden" name="action" value="inscrire">
+                                <button type="submit" class="btn btn-primary btn-lg">S'inscrire à cet événement</button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         <?php else: ?>
-             <div style="text-align: center; padding: 50px; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <h3 style="color: #dc3545;">Événement introuvable.</h3>
-                <p style="color: #6c757d; margin-top: 10px;">L'événement que vous recherchez n'existe pas ou n'est plus disponible.</p>
-                <a href="evenements.php" style="background-color: #007bff; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; margin-top: 20px; display: inline-block;">Retourner aux événements</a>
+            <div class="empty-state-modern">
+                <h3>Événement introuvable</h3>
+                <p>L'événement que vous cherchez n'existe pas ou n'est plus disponible.</p>
+                <a href="evenements.php" class="btn btn-primary">Retour aux événements</a>
             </div>
         <?php endif; ?>
+    </div>
+    
+    <!-- Fermer la div de contenu principal -->
     </div>
 </body>
 </html>

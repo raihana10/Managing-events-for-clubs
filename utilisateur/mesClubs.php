@@ -3,7 +3,7 @@
 require_once '../config/database.php';
 require_once '../config/session.php';
 
-$currentPage = 'tous-les-clubs';
+$currentPage = 'mes-clubs';
 
 requireLogin(); // Redirige si l'utilisateur n'est pas connecté
 requireRole(['participant']); // S'assure que seul un participant peut accéder
@@ -14,16 +14,21 @@ $db = $database->getConnection();
 $message = '';
 $message_type = '';
 
-// Récupérer la liste de tous les clubs avec leurs statistiques réelles
+// Récupérer UNIQUEMENT les clubs dont l'utilisateur est membre avec leurs statistiques réelles
+$user_id = $_SESSION['user_id'];
 $query = "SELECT c.IdClub, c.NomClub, c.Description, c.Logo, u.Nom as AdminNom, u.Prenom as AdminPrenom,
-          (SELECT COUNT(*) FROM Adhesion a WHERE a.IdClub = c.IdClub AND a.Status = 'actif') as nb_membres,
+          (SELECT COUNT(*) FROM Adhesion a2 WHERE a2.IdClub = c.IdClub AND a2.Status = 'actif') as nb_membres,
           (SELECT COUNT(*) FROM Evenement e WHERE e.IdClub = c.IdClub AND e.Etat = 'valide' AND e.Date >= CURDATE()) as nb_evenements
-          FROM Club c 
-          JOIN Utilisateur u ON c.IdAdminClub = u.IdUtilisateur 
+          FROM Adhesion a
+          JOIN Club c ON a.IdClub = c.IdClub
+          JOIN Utilisateur u ON c.IdAdminClub = u.IdUtilisateur
+          WHERE a.IdParticipant = :user_id AND a.Status = 'actif'
           ORDER BY c.NomClub ASC";
 $stmt = $db->prepare($query);
+$stmt->bindParam(':user_id', $user_id);
 $stmt->execute();
 $clubs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Gérer les messages de session
 if (isset($_SESSION['message'])) {
@@ -39,7 +44,7 @@ if (isset($_SESSION['message'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clubs - Event Manager</title>
+    <title>Mes Clubs - Event Manager</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/components.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -51,8 +56,8 @@ if (isset($_SESSION['message'])) {
     <!-- Contenu principal avec padding pour éviter la sidebar -->
     <div style="padding: 20px;">
         <div class="page-title">
-            <h1>Tous les Clubs de l'Ecole</h1>
-            <p>Explorez la liste complète des clubs, rejoignez leurs communautés et participez à leurs événements.</p>
+            <h1>Mes Clubs </h1>
+            <p>EVous n'êtes membre d'aucun club pour le moment.</p>
         </div>
 
         <?php if ($message): ?>
@@ -74,7 +79,7 @@ if (isset($_SESSION['message'])) {
                         <?php if ($logo_path): ?>
                             <img src="<?php echo htmlspecialchars($logo_path); ?>" alt="Logo <?php echo htmlspecialchars($club['NomClub']); ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--border-radius-lg);">
                         <?php else: ?>
-                            🏛️
+                            
                         <?php endif; ?>
                     </div>
                     
@@ -107,7 +112,7 @@ if (isset($_SESSION['message'])) {
             <?php else: ?>
                 <div class="empty-state-modern">
                     <div class="empty-state-icon-modern">🏛️</div>
-                    <h3>Aucun club n'est disponible sur la plateforme pour le moment.</h3>
+                    <h3>Aucun club disponible</h3>
                     <p>Revenez bientôt pour découvrir les nouveaux clubs.</p>
                 </div>
             <?php endif; ?>

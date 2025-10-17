@@ -6,7 +6,7 @@ require_once '../config/session.php';
 $currentPage = 'parametres';
 
 requireLogin();
-requireRole(['participant']);
+requireRole(['organisateur']);
 
 $database = new Database();
 $db = $database->getConnection();
@@ -96,6 +96,12 @@ $stmt_user = $db->prepare($query_user);
 $stmt_user->bindParam(':id_utilisateur', $user_id);
 $stmt_user->execute();
 $user = $stmt_user->fetch(PDO::FETCH_ASSOC);
+// Récupérer le club associé à cet administrateur (pour header/sidebar)
+$club_query = "SELECT IdClub, NomClub FROM Club WHERE IdAdminClub = :user_id LIMIT 1";
+$club_stmt = $db->prepare($club_query);
+$club_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$club_stmt->execute();
+$club = $club_stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -110,16 +116,37 @@ $user = $stmt_user->fetch(PDO::FETCH_ASSOC);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <?php include '_sidebar.php'; ?>
-    <?php include '_navbar.php'; ?>
-    
-    <!-- Contenu principal avec padding pour éviter la sidebar -->
-    <div style="padding: 20px;">
-        <div class="page-title">
-            <h1>Paramètres du compte</h1>
+    <header class="header-modern">
+        <div class="header-content">
+            <a href="dashboard.php" class="logo-modern">Event Manager</a>
+            <div class="header-right">
+                <div class="club-info">
+                    <span class="club-badge"></span>
+                    <span><?php echo htmlspecialchars($club['NomClub'] ?? 'Mon Club'); ?></span>
+                </div>
+                <div class="user-section">
+                    <div class="user-info">
+                        <div class="user-name"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></div>
+                        <div class="user-role">Administrateur du club</div>
+                    </div>
+                    <?php $initials = strtoupper(substr($_SESSION['prenom'],0,1) . substr($_SESSION['nom'],0,1)); ?>
+                    <div class="user-avatar-modern"><?php echo $initials; ?></div>
+                    <button class="btn btn-ghost btn-sm" onclick="window.location.href='../auth/logout.php'">Déconnexion</button>
+                </div>
+            </div>
         </div>
+    </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl">
+    <div class="container">
+        <div class="layout">
+            <?php include __DIR__ . '/_sidebar.php'; ?>
+
+            <main class="main-content">
+                <div class="page-title">
+                    <h1>Paramètres du compte</h1>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl">
             
             <!-- Section Informations personnelles -->
             <div class="card">
@@ -127,8 +154,8 @@ $user = $stmt_user->fetch(PDO::FETCH_ASSOC);
                     <h3>Informations personnelles</h3>
                 </div>
                 <div class="card-body">
-                    <?php if (isset($profile_message)): // Afficher le message de mise à jour du profil ?>
-                        <div class="alert-modern alert-success-modern"><?php echo $profile_message; ?></div>
+                    <?php if (!empty($profile_message)): // Afficher le message de mise à jour du profil ?>
+                        <div class="alert-modern <?php echo ($profile_message_type === 'error') ? 'alert-error-modern' : 'alert-success-modern'; ?>"><?php echo htmlspecialchars($profile_message); ?></div>
                     <?php endif; ?>
 
                     <form method="POST" action="parametres.php">
@@ -160,8 +187,8 @@ $user = $stmt_user->fetch(PDO::FETCH_ASSOC);
                     <h3>Changer le mot de passe</h3>
                 </div>
                 <div class="card-body">
-                    <?php if (isset($password_message)): // Afficher le message de changement de mot de passe ?>
-                        <div class="alert-modern alert-success-modern"><?php echo $password_message; ?></div>
+                    <?php if (!empty($password_message)): // Afficher le message de changement de mot de passe ?>
+                        <div class="alert-modern <?php echo ($password_message_type === 'error') ? 'alert-error-modern' : 'alert-success-modern'; ?>"><?php echo htmlspecialchars($password_message); ?></div>
                     <?php endif; ?>
 
                     <form method="POST" action="parametres.php">
@@ -181,11 +208,8 @@ $user = $stmt_user->fetch(PDO::FETCH_ASSOC);
                         <button type="submit" class="btn btn-secondary">Changer le mot de passe</button>
                     </form>
                 </div>
-            </div>
+            </main>
         </div>
-    </div>
-    
-    <!-- Fermer la div de contenu principal -->
     </div>
 </body>
 </html>

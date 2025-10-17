@@ -80,69 +80,7 @@ if ($club) {
 
     <div class="container">
         <div class="layout">
-            <aside class="sidebar-modern">
-                <nav class="sidebar-nav-modern">
-                    <div class="sidebar-section-modern">
-                        <div class="sidebar-title-modern">Gestion</div>
-                        <ul class="sidebar-nav-modern">
-                            <li class="sidebar-nav-item-modern">
-                                <a href="dashboard.php" class="sidebar-nav-link-modern active">
-                                    <div class="sidebar-nav-icon-modern">📊</div>
-                                    Tableau de bord
-                                </a>
-                            </li>
-                            <li class="sidebar-nav-item-modern">
-                                <a href="gerer_event.php" class="sidebar-nav-link-modern">
-                                    <div class="sidebar-nav-icon-modern">📅</div>
-                                    Mes événements
-                                </a>
-                            </li>
-                            <li class="sidebar-nav-item-modern">
-                                <a href="creer_event.php" class="sidebar-nav-link-modern">
-                                    <div class="sidebar-nav-icon-modern">➕</div>
-                                    Créer événement
-                                </a>
-                            </li>
-                            <li class="sidebar-nav-item-modern">
-                                <a href="membres.php" class="sidebar-nav-link-modern">
-                                    <div class="sidebar-nav-icon-modern">👥</div>
-                                    Membres
-                                </a>
-                            </li>
-                            <li class="sidebar-nav-item-modern">
-                                <a href="envoyer_email.php" class="sidebar-nav-link-modern">
-                                    <div class="sidebar-nav-icon-modern">📧</div>
-                                    Communication
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="sidebar-section-modern">
-                        <div class="sidebar-title-modern">Personnel</div>
-                        <ul class="sidebar-nav-modern">
-                            <li class="sidebar-nav-item-modern">
-                                <a href="../utilisateur/mes_inscriptions.php" class="sidebar-nav-link-modern">
-                                    <div class="sidebar-nav-icon-modern">📋</div>
-                                    Mes inscriptions
-                                </a>
-                            </li>
-                            <li class="sidebar-nav-item-modern">
-                                <a href="../utilisateur/clubs.php" class="sidebar-nav-link-modern">
-                                    <div class="sidebar-nav-icon-modern">🏛️</div>
-                                    Autres clubs
-                                </a>
-                            </li>
-                            <li class="sidebar-nav-item-modern">
-                                <a href="parametres.php" class="sidebar-nav-link-modern">
-                                    <div class="sidebar-nav-icon-modern">⚙️</div>
-                                    Paramètres
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </aside>
+            <?php include __DIR__ . '/_sidebar.php'; ?>
 
             <main class="main-content">
                 <div class="page-title">

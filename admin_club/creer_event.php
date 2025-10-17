@@ -76,19 +76,45 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             } elseif ($file_size > 5 * 1024 * 1024) {
                 $error = "Le fichier est trop volumineux.";
             } else {
-                $upload_dir = '../uploads/affiches/';
-                if (!is_dir($upload_dir)) {
-                    mkdir($upload_dir, 0755, true);
+                // Use absolute filesystem path for storing file and compute a web-accessible path
+                $upload_dir_fs = realpath(__DIR__ . '/../uploads/affiches') ?: (__DIR__ . '/../uploads/affiches');
+                if (!is_dir($upload_dir_fs)) {
+                    mkdir($upload_dir_fs, 0755, true);
                 }
                 $new_file_name = uniqid('affiche_') . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file_name);
-                $destination = $upload_dir . $new_file_name;
+                $destination_fs = rtrim($upload_dir_fs, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $new_file_name;
 
-                if (move_uploaded_file($file_tmp, $destination)) {
-                    $affiche_path = $destination;
+                if (move_uploaded_file($file_tmp, $destination_fs)) {
+                    // Try to compute a web path from the filesystem destination
+                    $affiche_path = null;
+                    if (isset($_SERVER['DOCUMENT_ROOT'])) {
+                        $docroot = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT']));
+                        $dest_norm = str_replace('\\', '/', realpath($destination_fs));
+                        if ($docroot && $dest_norm && strpos($dest_norm, $docroot) === 0) {
+                            $web_path = '/' . ltrim(substr($dest_norm, strlen($docroot)), '/');
+                            $affiche_path = $web_path;
+                        }
+                    }
+
+                    // Fallback to a relative web path if we couldn't build one from DOCUMENT_ROOT
+                    if (empty($affiche_path)) {
+                        $affiche_path = '../uploads/affiches/' . $new_file_name;
+                    }
+
+                    // Store both filesystem and web paths so other pages can reliably check existence
+                    $affiche_path = [
+                        'web' => $affiche_path,
+                        'fs' => $destination_fs,
+                    ];
                 } else {
                     $error = "Erreur lors de l'enregistrement du fichier.";
                 }
             }
+        }
+
+        // If no new file uploaded, keep previous affiche from session
+        if ($affiche_path === null && !isset($error) && !empty($_SESSION['event_preview']['affiche'])) {
+            $affiche_path = $_SESSION['event_preview']['affiche'];
         }
 
         // Si pas d'erreur, on insère l'événement
@@ -113,7 +139,16 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $stmt->bindParam(':type_evenement', $type);
             $stmt->bindParam(':participant', $participant);
             $stmt->bindParam(':capacite_max', $capacite_max);
-            $stmt->bindParam(':affiche', $affiche_path);
+            // Only store the web path in DB. $affiche_path may be array {web, fs} or string or null
+            $affiche_db_value = null;
+            if (!empty($affiche_path)) {
+                if (is_array($affiche_path)) {
+                    $affiche_db_value = $affiche_path['web'] ?? null;
+                } else {
+                    $affiche_db_value = $affiche_path;
+                }
+            }
+            $stmt->bindParam(':affiche', $affiche_db_value);
             $stmt->bindParam(':prix_adherent', $prix_adherent);
             $stmt->bindParam(':prix_non_adherent', $prix_non_adherent);
             $stmt->bindParam(':prix_externe', $prix_externe);
@@ -122,6 +157,33 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
             try {
                 $stmt->execute();
+                    // Normalize affiche storage: always store array with 'web' and 'fs' keys
+                    $affiche_for_session = null;
+                    if (!empty($affiche_path)) {
+                        if (is_array($affiche_path)) {
+                            $affiche_for_session = $affiche_path;
+                        } else {
+                            $affiche_for_session = ['web' => $affiche_path, 'fs' => null];
+                        }
+                    }
+
+                    $_SESSION['event_preview']=[
+                    'id_club'=>$id_club,
+                    'nom_evenement'=>$nom_evenement,
+                    'heure_debut'=>$heure_debut,
+                    'heure_fin'=>$heure_fin,
+                    'date'=>$date,
+                    'lieu'=>$lieu,
+                    'type'=>$type,
+                    'participant'=>$participant,
+                    'capacite_max'=>$capacite_max,
+                    'affiche'=>$affiche_for_session,
+                    'prix_adherent'=>$prix_adherent,
+                    'prix_non_adherent'=>$prix_non_adherent,
+                    'prix_externe'=>$prix_externe,
+                    'description'=>$description,
+                    'etat'=>$etat
+                ];
                 // Redirect without GET parameters (user requested no GET usage)
                 header("Location: recap_evenements.php");
                 exit();
@@ -158,67 +220,7 @@ if (empty($_SESSION['form_token'])) {
 
 </head>
 <body>
-    <aside class="sidebar-modern">
-        <nav class="sidebar-section-modern">
-            <div class="sidebar-title-modern">Gestion</div>
-            <ul class="sidebar-nav-modern">
-                <li class="sidebar-nav-item-modern">
-                    <a href="dashboard.php" class="sidebar-nav-link-modern">
-                        <span class="sidebar-nav-icon-modern">📊</span>
-                        Tableau de bord
-                    </a>
-                </li>
-                <li class="sidebar-nav-item-modern">
-                    <a href="mes_evenements.php" class="sidebar-nav-link-modern">
-                        <span class="sidebar-nav-icon-modern">📅</span>
-                        Mes événements
-                    </a>
-                </li>
-                <li class="sidebar-nav-item-modern">
-                    <a href="creer_event.php" class="sidebar-nav-link-modern active">
-                        <span class="sidebar-nav-icon-modern">➕</span>
-                        Créer événement
-                    </a>
-                </li>
-                <li class="sidebar-nav-item-modern">
-                    <a href="membres.php" class="sidebar-nav-link-modern">
-                        <span class="sidebar-nav-icon-modern">👥</span>
-                        Membres
-                    </a>
-                </li>
-                <li class="sidebar-nav-item-modern">
-                    <a href="envoyer_email.php" class="sidebar-nav-link-modern">
-                        <span class="sidebar-nav-icon-modern">✉️</span>
-                        Communication
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <nav class="sidebar-section-modern">
-            <div class="sidebar-title-modern">Personnel</div>
-            <ul class="sidebar-nav-modern">
-                <li class="sidebar-nav-item-modern">
-                    <a href="../utilisateur/mes_inscriptions.php" class="sidebar-nav-link-modern">
-                        <span class="sidebar-nav-icon-modern">📋</span>
-                        Mes inscriptions
-                    </a>
-                </li>
-                <li class="sidebar-nav-item-modern">
-                    <a href="../utilisateur/clubs.php" class="sidebar-nav-link-modern">
-                        <span class="sidebar-nav-icon-modern">🏢</span>
-                        Autres clubs
-                    </a>
-                </li>
-                <li class="sidebar-nav-item-modern">
-                    <a href="parametres.php" class="sidebar-nav-link-modern">
-                        <span class="sidebar-nav-icon-modern">⚙️</span>
-                        Paramètres
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </aside>
+    <?php include __DIR__ . '/_sidebar.php'; ?>
 
     <div class="main-content">
         <header class="header-modern">
@@ -346,7 +348,7 @@ if (empty($_SESSION['form_token'])) {
                                 <label class="form-label-modern" for="participant">Participants</label>
                                 <select id="participant" name="participant" class="form-select-modern">
                                     <option value="Adhérents">Adhérents</option>
-                                    <option value="Membres uniquement">Tous les Ensatiens</option>
+                                    <option value="Ensatiens">Tous les Ensatiens</option>
                                     <option value="Tous">Ensatiens + Externes </option>
                                 </select>
                             </div>
@@ -393,7 +395,7 @@ if (empty($_SESSION['form_token'])) {
                                 <input type="number" step="0.01" min="0" id="prix_non_adherent" name="prix_non_adherent" class="form-input-modern" placeholder="Prix non-adhérent" style="flex:1;">
                                 <input type="number" step="0.01" min="0" id="prix_externe" name="prix_externe" class="form-input-modern" placeholder="Prix externe" style="flex:1;">
                             </div>
-                            <div class="info-box" style="margin-top:8px;">Ces prix seront stockés dans PrixAdherent, PrixNonAdherent, PrixExterne.</div>
+                            
                         </div>
 
                         <div class="form-group-modern full-width">
@@ -428,7 +430,7 @@ if (empty($_SESSION['form_token'])) {
                     
 
                     <div class="form-actions">
-                        <a href="mes_evenements.php" class="btn btn-secondary">Annuler</a>
+                        <a href="recap_evenements.php" class="btn btn-secondary">Annuler</a>
                         <button type="submit" class="btn btn-primary">✓ Créer l'événement</button>
                     </div>
                 </form>
@@ -478,12 +480,18 @@ if (empty($_SESSION['form_token'])) {
                         if (el) el.dispatchEvent(new Event('change'));
                     });
 
-                    // Show existing affiche preview if present
+                    // Show existing affiche preview if present. eventPreview.affiche can be a string or an object {web, fs}
                     if (eventPreview.affiche) {
                         const preview = document.getElementById('affiche-preview');
                         const fileUploadLabel = document.querySelector('.file-upload');
-                        if (preview) preview.src = eventPreview.affiche;
-                        if (fileUploadLabel) fileUploadLabel.classList.add('has-preview');
+                        let webPath = null;
+                        if (typeof eventPreview.affiche === 'object') {
+                            webPath = eventPreview.affiche.web || null;
+                        } else if (typeof eventPreview.affiche === 'string') {
+                            webPath = eventPreview.affiche;
+                        }
+                        if (preview && webPath) preview.src = webPath;
+                        if (fileUploadLabel && webPath) fileUploadLabel.classList.add('has-preview');
                     }
                 } catch (e) {
                     console.error('Error pre-filling form:', e);
@@ -600,7 +608,7 @@ if (empty($_SESSION['form_token'])) {
         // initialize
         toggleTypeAutre(); toggleLieuAutre();
 
-        // Toggle price fields based on participant selection
+       
         const participantSelect = document.getElementById('participant');
         const prixFields = document.getElementById('prix-fields');
         const prixAdherent = document.getElementById('prix_adherent');
@@ -609,11 +617,11 @@ if (empty($_SESSION['form_token'])) {
 
         function updatePrixVisibility() {
             const val = participantSelect.value;
-            // Show the whole block if participants have pricing options
+            
             if (val === 'Adhérents') {
                 prixFields.style.display = 'block';
                 prixAdherent.style.display = 'block'; prixNonAdherent.style.display = 'none'; prixExterne.style.display = 'none';
-            } else if (val === 'Membres uniquement') {
+            } else if (val === 'Ensatiens') {
                 prixFields.style.display = 'block';
                 prixAdherent.style.display = 'block'; prixNonAdherent.style.display = 'block'; prixExterne.style.display = 'none';
             } else if (val === 'Tous') {
